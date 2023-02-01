@@ -5,13 +5,13 @@ const dbConfig = require("./config/db.config");
 const auth = require("./middlewares/auth");
 const errors = require("./middlewares/errors");
 
-const unless = require("express-unless");
+const {unless} = require("express-unless");
 
 const app = express();
 
 mongoose.Promise = global.Promise;
 mongoose
-    .connect(db.donfig.db, {
+    .connect(dbConfig.db, {
         useNewUrlPaser: true,
         useUnifiedTopology: true,
     })

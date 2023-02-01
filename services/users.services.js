@@ -1,37 +1,43 @@
-const mongoose = require("mongoose");
-const {Schema} = mongoose;
-const uniqueValidator = require("mongoose-unique-validator");
+const User = require("../models/user.models");
+const bcrypt = require("bcryptjs");
+const auth = require("../middlewares/auth");
 
-const userSchema = new Schema({
-    username:{
-        type: String,
-        required: true
-    },
-    email:{
-        type:String,
-        required: true,
-        unique: true,
-    },
-    password:{
-        type: String,
-        required: true,
-    },
-    date: {
-        type: Date,
-        default: Date.now()
+async function login({username, password}, callback){
+    const user = await User.findOne({username});
+
+    if(user!= null){
+        if(bcrypt.compareSync(password, user.password)){
+            const token = auth.generateAccessToken(username);
+            return callback(null, {...user.toJSON(),token});
+        }
+        else {
+            return callback({
+                message: "Invalid Username/Password!",
+            })
+        }
     }
-});
-
-userSchema.set("toJSON", {
-    transform: (document, returnObject)=>{
-        returnedObject.id = returnedObject._id.toString();
-        delete returnedObject._id;
-        delete returnedObject._v;
-        delete returnedObject.password;
+    else{
+        return callback({
+            message: "Invalid Username/Password!",
+        })
     }
-})
+}
 
-userSchema.plugin(uniqueValidator, {message:"Email already in use."});
+async function register(params, callback){
+    if(params.username === undefined){
+        return callback({message: "Username Required"});
+    }
 
-const User = mongoose.model("user", userSchema);
-module,exports = User;
+    const user = new User(params);
+    user.save()
+    .then((response)=> {
+        return callback(null, response);
+    })
+    .catch((error) => {
+        return callback(error);
+    });
+}
+
+module.exports = {
+    login, register,
+}
