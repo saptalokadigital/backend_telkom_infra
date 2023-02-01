@@ -12,3 +12,13 @@ function authenticateToken(req, res, next) {
         next();
     });
 }
+function generateAccessToken(isername) {
+    return jwt.sign({ data: username }, "Snippet_Key", {
+        expireIn: "1h",
+    });
+}
+
+module.exports = {
+    authenticateToken,
+    generateAccessToken,
+};
