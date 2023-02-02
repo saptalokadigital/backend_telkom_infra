@@ -12,9 +12,9 @@ function authenticateToken(req, res, next) {
         next();
     });
 }
-function generateAccessToken(isername) {
+function generateAccessToken(username) {
     return jwt.sign({ data: username }, "Snippet_Key", {
-        expireIn: "1h",
+        expiresIn: "1h",
     });
 }
 

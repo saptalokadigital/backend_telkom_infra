@@ -1,37 +1,37 @@
 const mongoose = require("mongoose");
-const {Schema} = mongoose;
+const { Schema } = mongoose;
 const uniqueValidator = require("mongoose-unique-validator");
 
 const userSchema = new Schema({
-    username:{
+    username: {
         type: String,
-        required: true
+        required: true,
     },
-    email:{
-        type:String,
+    email: {
+        type: String,
         required: true,
         unique: true,
     },
-    password:{
+    password: {
         type: String,
         required: true,
     },
     date: {
         type: Date,
-        default: Date.now()
-    }
+        default: Date.now(),
+    },
 });
 
 userSchema.set("toJSON", {
-    transform: (document, returnObject)=>{
+    transform: (document, returnedObject) => {
         returnedObject.id = returnedObject._id.toString();
         delete returnedObject._id;
-        delete returnedObject._v;
+        delete returnedObject.__v;
         delete returnedObject.password;
-    }
-})
+    },
+});
 
-userSchema.plugin(uniqueValidator, {message:"Email already in use."});
+userSchema.plugin(uniqueValidator, { message: "Email already in use." });
 
 const User = mongoose.model("user", userSchema);
 module.exports = User;
