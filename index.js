@@ -9,6 +9,7 @@ const { unless } = require("express-unless");
 
 const app = express();
 
+mongoose.set("strictQuery", false);
 mongoose.Promise = global.Promise;
 mongoose
     .connect(dbConfig.db, {
