@@ -114,11 +114,11 @@ exports.deleteUser = (req, res, next) => {
         });
 };
 
-exports.userProfile = (req, res, next) => {
+exports.validate = (req, res, next) => {
     try {
         const authHeader = req.headers["authorization"];
         const token = authHeader && authHeader.split(" ")[1];
-        console.log(token);
+
         if (!token)
             return res
                 .status(401)
@@ -137,6 +137,19 @@ exports.userProfile = (req, res, next) => {
         return res.status(500).send({
             auth: false,
             message: "Failed to authenticate token.",
+        });
+    }
+};
+
+exports.userProfile = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user.userId);
+
+        res.send(user);
+    } catch (error) {
+        return res.status(500).send({
+            auth: false,
+            message: "No one found",
         });
     }
 };
