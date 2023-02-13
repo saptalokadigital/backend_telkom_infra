@@ -15,4 +15,6 @@ router.delete("/:userId", userController.deleteUser);
 router.get("/validate", auth, userController.validate);
 
 router.get("/userProfile", auth, userController.userProfile);
+
+router.get("/data", userController.getAll);
 module.exports = router;

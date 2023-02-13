@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const dashCableModel = require("../models/dashboard_cable.models");
 require("dotenv").config();
 
 // Create new user or Sign up
@@ -152,4 +153,15 @@ exports.userProfile = async (req, res, next) => {
             message: "No one found",
         });
     }
+};
+
+exports.getAll = (req, res, next) => {
+    dashCableModel.find({}).exec(function (err, cables) {
+        if (err) {
+            res.send("error has occured");
+        } else {
+            console.log(cables);
+            res.json(cables);
+        }
+    });
 };
