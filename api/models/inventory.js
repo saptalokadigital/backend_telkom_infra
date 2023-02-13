@@ -8,15 +8,11 @@ const dashCableSchema = new Schema({
         required: true,
         unique: true,
     },
-    depo_location: {
-        type: String,
-        required: true,
-    },
     label_id: {
         type: Number,
         required: true,
     },
-    SYSTEM: {
+    system: {
         type: String,
     },
     cable_type: {
@@ -36,7 +32,7 @@ const dashCableSchema = new Schema({
         type: Number,
         required: true,
     },
-    doc: {
+    doc_reff: {
         type: Object,
     },
     tank_outer: {
