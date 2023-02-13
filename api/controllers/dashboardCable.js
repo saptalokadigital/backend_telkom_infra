@@ -11,3 +11,19 @@ exports.getAll = (req, res, next) => {
         }
     });
 };
+
+exports.getPage = (req, res, next) => {
+    const page = parseInt(req.params.page, 10);
+    dashCableModel
+        .find({})
+        .skip((page - 1) * 20)
+        .limit(20)
+        .exec(function (err, cables) {
+            if (err) {
+                res.send("error has occured");
+            } else {
+                console.log(cables);
+                res.json(cables);
+            }
+        });
+};
