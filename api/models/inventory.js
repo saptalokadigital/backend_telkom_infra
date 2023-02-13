@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const uniqueValidator = require("mongoose-unique-validator");
 
-const dashCableSchema = new Schema({
+const inventorySchema = new Schema({
     no: {
         type: Number,
         required: true,
@@ -64,7 +64,7 @@ const dashCableSchema = new Schema({
     },
 });
 
-dashCableSchema.set("toJSON", {
+inventorySchema.set("toJSON", {
     transform: (document, returnedObject) => {
         returnedObject.id = returnedObject._id.toString();
         delete returnedObject._id;
@@ -73,13 +73,13 @@ dashCableSchema.set("toJSON", {
     },
 });
 
-dashCableSchema.plugin(uniqueValidator, {
+inventorySchema.plugin(uniqueValidator, {
     message: "Email/Username already in use.",
 });
 
-const dashCableModel = mongoose.model(
-    "dashCable",
-    dashCableSchema,
-    "dashboard_cable"
+const inventoryModel = mongoose.model(
+    "inventory",
+    inventorySchema,
+    "inventory"
 );
-module.exports = dashCableModel;
+module.exports = inventoryModel;
