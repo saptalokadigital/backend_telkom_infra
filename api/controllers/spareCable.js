@@ -1,8 +1,8 @@
-const dashCableModel = require("../models/dashboard_cable.models");
+const spareCableModel = require("../models/spare_cable.models");
 require("dotenv").config();
 
 exports.getAll = (req, res, next) => {
-    dashCableModel.find({}).exec(function (err, cables) {
+    spareCableModel.find({}).exec(function (err, cables) {
         if (err) {
             res.send("error has occured");
         } else {
@@ -14,7 +14,7 @@ exports.getAll = (req, res, next) => {
 
 exports.getPage = (req, res, next) => {
     const page = parseInt(req.params.page, 10);
-    dashCableModel
+    spareCableModel
         .find({})
         .skip((page - 1) * 20)
         .limit(20)
@@ -29,7 +29,7 @@ exports.getPage = (req, res, next) => {
 };
 
 exports.getCablePopulate = (req, res, next) => {
-    dashCableModel
+    spareCableModel
         .aggregate([
             {
                 $lookup: {

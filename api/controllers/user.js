@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const dashCableModel = require("../models/dashboard_cable.models");
+const dashCableModel = require("../models/spare_cable.models");
 require("dotenv").config();
 
 // Create new user or Sign up
