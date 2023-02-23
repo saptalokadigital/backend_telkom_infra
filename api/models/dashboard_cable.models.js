@@ -5,28 +5,27 @@ const uniqueValidator = require("mongoose-unique-validator");
 const dashCableSchema = new Schema({
     no: {
         type: Number,
-        required: true,
-        unique: true,
     },
     depo_location: {
         type: String,
-        required: true,
     },
     label_id: {
         type: Number,
-        required: true,
     },
-    SYSTEM: {
-        type: String,
+    system: {
+        type: { type: mongoose.Schema.Types.ObjectId, ref: "System" },
     },
     cable_type: {
-        type: String,
+        type: { type: mongoose.Schema.Types.ObjectId, ref: "cable_type" },
     },
     manufacturer: {
-        type: String,
+        type: { type: mongoose.Schema.Types.ObjectId, ref: "manufacturer" },
     },
     armoring_type: {
-        type: String,
+        type: { type: mongoose.Schema.Types.ObjectId, ref: "armoring_type" },
+    },
+    core_type: {
+        type: { type: mongoose.Schema.Types.ObjectId, ref: "core_type" },
     },
     length_report: {
         type: Number,
