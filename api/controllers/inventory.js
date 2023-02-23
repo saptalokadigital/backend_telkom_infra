@@ -1,8 +1,8 @@
-const inventoryModel = require("../models/inventory");
+const spareCableModel = require("../models/spare_cable.models");
 require("dotenv").config();
 
 exports.getTank = (req, res, next) => {
-    inventoryModel
+    spareCableModel
         .find({
             $or: [
                 {

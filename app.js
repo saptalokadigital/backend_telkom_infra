@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 const mongoUrl = "mongodb://127.0.0.1:27017/telkominfra";
 
 const userRoutes = require("./api/routes/user");
-const dashboardCableRoutes = require("./api/routes/dashboardCable");
+const spareCableRoutes = require("./api/routes/spareCable");
 const inventoryRoutes = require("./api/routes/inventory");
 
 mongoose
@@ -45,7 +45,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/user", userRoutes);
-app.use("/api/dashboardCable", dashboardCableRoutes);
+app.use("/api/spareCable", spareCableRoutes);
 app.use("/api/inventory", inventoryRoutes);
 
 app.use((req, res, next) => {
