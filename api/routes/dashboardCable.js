@@ -4,4 +4,5 @@ const dashboardCableController = require("../controllers/dashboardCable");
 
 router.get("/data/", dashboardCableController.getAll);
 router.get("/data/:page", dashboardCableController.getPage);
+router.get("/", dashboardCableController.getCablePopulate);
 module.exports = router;
