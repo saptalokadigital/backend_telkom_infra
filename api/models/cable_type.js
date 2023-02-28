@@ -4,4 +4,4 @@ const cableTypeSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     name: { type: String, require: true },
 });
-module.exports = mongoose.model("cableType", cableTypeSchema, "cable_type");
+module.exports = mongoose.model("cable_type", cableTypeSchema);
