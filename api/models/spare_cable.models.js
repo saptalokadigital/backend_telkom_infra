@@ -80,5 +80,5 @@ spareCableSchema.plugin(uniqueValidator, {
     message: "Email/Username already in use.",
 });
 
-const spareCableModel = mongoose.model("spareCable", spareCableSchema);
+const spareCableModel = mongoose.model("spare_cable", spareCableSchema);
 module.exports = spareCableModel;

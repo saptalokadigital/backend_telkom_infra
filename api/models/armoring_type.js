@@ -4,4 +4,4 @@ const armoringTypeSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     name: { type: String, require: true },
 });
-module.exports = mongoose.model("armoringType", armoringTypeSchema);
+module.exports = mongoose.model("armoring_type", armoringTypeSchema);
