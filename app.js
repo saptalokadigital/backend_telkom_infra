@@ -9,6 +9,7 @@ const mongoUrl = "mongodb://127.0.0.1:27017/telkominfra";
 const userRoutes = require("./api/routes/user");
 const spareCableRoutes = require("./api/routes/spareCable");
 const inventoryRoutes = require("./api/routes/inventory");
+const loadingRoutes = require("./api/routes/loading");
 
 mongoose
     .connect(mongoUrl, {
@@ -47,6 +48,7 @@ app.use((req, res, next) => {
 app.use("/api/user", userRoutes);
 app.use("/api/spareCable", spareCableRoutes);
 app.use("/api/inventory", inventoryRoutes);
+app.use("/api/loading", loadingRoutes);
 
 app.use((req, res, next) => {
     const error = new Error("Not found");
