@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const armoringTypeSchema = mongoose.Schema({
-  armoring_type: { type: String, require: true },
+    _id: mongoose.Schema.Types.ObjectId,
+    name: { type: String, require: true },
 });
-const armoringType = mongoose.model("armoring_type", armoringTypeSchema);
-module.exports = armoringType;
+module.exports = mongoose.model("armoring_type", armoringTypeSchema);

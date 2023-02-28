@@ -14,165 +14,168 @@ const ArmoringType = require("./api/models/armoring_type");
 const CableType = require("./api/models/cable_type");
 const CoreType = require("./api/models/core_type");
 const System = require("./api/models/system");
+const spareCableRoutes = require("./api/routes/spareCable");
+const inventoryRoutes = require("./api/routes/inventory");
+const loadingRoutes = require("./api/routes/loading");
 
 mongoose
-  .connect(mongoUrl, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("Berhasil Connect Ke Database");
-  })
-  .catch((e) => {
-    console.log(e);
-    console.log("Gagal Connect Ke Database");
-  });
+    .connect(mongoUrl, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    .then(() => {
+        console.log("Berhasil Connect Ke Database");
+    })
+    .catch((e) => {
+        console.log(e);
+        console.log("Gagal Connect Ke Database");
+    });
 
 app.use(express.json());
 
 // SYSTEM
 //POST System
 app.post("/createSystem", async (req, res) => {
-  let data = new System(req.body);
-  const result = await data.save();
-  res.send(result);
+    let data = new System(req.body);
+    const result = await data.save();
+    res.send(result);
 });
 
 // GET all System
 app.get("/listSystem", async (req, res) => {
-  let data = await System.find();
-  res.send(data);
+    let data = await System.find();
+    res.send(data);
 });
 
 // DELETE System
 app.delete("/deleteSystem/:_id", async (req, res) => {
-  console.log(req.params);
-  let data = await System.deleteOne(req.params);
+    console.log(req.params);
+    let data = await System.deleteOne(req.params);
 
-  res.send(data);
+    res.send(data);
 });
 
 // PUT System
 app.put("/updateSystem/:_id", async (req, res) => {
-  console.log(req.params);
-  let data = await System.updateOne(req.params, { $set: req.body });
-  res.send(data);
+    console.log(req.params);
+    let data = await System.updateOne(req.params, { $set: req.body });
+    res.send(data);
 });
 
 //CORE TYPE
 //POST core type
 app.post("/createCoreType", async (req, res) => {
-  let data = new CoreType(req.body);
-  const result = await data.save();
-  res.send(result);
+    let data = new CoreType(req.body);
+    const result = await data.save();
+    res.send(result);
 });
 
 // GET all Core_type
 app.get("/listCoreType", async (req, res) => {
-  let data = await CoreType.find();
-  res.send(data);
+    let data = await CoreType.find();
+    res.send(data);
 });
 
 // DELETE Core_type
 app.delete("/deleteCoreType/:_id", async (req, res) => {
-  console.log(req.params);
-  let data = await CoreType.deleteOne(req.params);
+    console.log(req.params);
+    let data = await CoreType.deleteOne(req.params);
 
-  res.send(data);
+    res.send(data);
 });
 
 // PUT Core_type
 app.put("/updateCoreType/:_id", async (req, res) => {
-  console.log(req.params);
-  let data = await CoreType.updateOne(req.params, { $set: req.body });
-  res.send(data);
+    console.log(req.params);
+    let data = await CoreType.updateOne(req.params, { $set: req.body });
+    res.send(data);
 });
 
 //CABLE TYPE
 // POST cable type
 app.post("/createCableType", async (req, res) => {
-  let data = new CableType(req.body);
-  const result = await data.save();
-  res.send(result);
+    let data = new CableType(req.body);
+    const result = await data.save();
+    res.send(result);
 });
 
 // GET all Cable_type
 app.get("/listCableType", async (req, res) => {
-  let data = await CableType.find();
-  res.send(data);
+    let data = await CableType.find();
+    res.send(data);
 });
 
 // DELETE Cable_type
 app.delete("/deleteCableType/:_id", async (req, res) => {
-  console.log(req.params);
-  let data = await CableType.deleteOne(req.params);
+    console.log(req.params);
+    let data = await CableType.deleteOne(req.params);
 
-  res.send(data);
+    res.send(data);
 });
 
 // PUT Cable_type
 app.put("/updateCableType/:_id", async (req, res) => {
-  console.log(req.params);
-  let data = await CableType.updateOne(req.params, { $set: req.body });
-  res.send(data);
+    console.log(req.params);
+    let data = await CableType.updateOne(req.params, { $set: req.body });
+    res.send(data);
 });
 
 // ARMORING TYPE
 // POST armoring_type
 app.post("/createArmoringType", async (req, res) => {
-  let data = new ArmoringType(req.body);
-  const result = await data.save();
-  res.send(result);
+    let data = new ArmoringType(req.body);
+    const result = await data.save();
+    res.send(result);
 });
 
 // GET all armoring_type
 app.get("/listArmoringType", async (req, res) => {
-  let data = await ArmoringType.find();
-  res.send(data);
+    let data = await ArmoringType.find();
+    res.send(data);
 });
 
 // DELETE armoring_type
 app.delete("/deleteArmoringType/:_id", async (req, res) => {
-  console.log(req.params);
-  let data = await ArmoringType.deleteOne(req.params);
+    console.log(req.params);
+    let data = await ArmoringType.deleteOne(req.params);
 
-  res.send(data);
+    res.send(data);
 });
 
 // PUT armoring_type
 app.put("/updateArmoringType/:_id", async (req, res) => {
-  console.log(req.params);
-  let data = await ArmoringType.updateOne(req.params, { $set: req.body });
-  res.send(data);
+    console.log(req.params);
+    let data = await ArmoringType.updateOne(req.params, { $set: req.body });
+    res.send(data);
 });
 
 // MANUFACTURER
 // POST manufacturer
 app.post("/createManufacturer", async (req, res) => {
-  let data = new Manufacturer(req.body);
-  const result = await data.save();
-  res.send(result);
+    let data = new Manufacturer(req.body);
+    const result = await data.save();
+    res.send(result);
 });
 
 // GET all manufacturer
 app.get("/listManufacturer", async (req, res) => {
-  let data = await Manufacturer.find();
-  res.send(data);
+    let data = await Manufacturer.find();
+    res.send(data);
 });
 
 // DELETE manufacturer
 app.delete("/deleteManufacturer/:_id", async (req, res) => {
-  console.log(req.params);
-  let data = await Manufacturer.deleteOne(req.params);
+    console.log(req.params);
+    let data = await Manufacturer.deleteOne(req.params);
 
-  res.send(data);
+    res.send(data);
 });
 
 // PUT manufacturer
 app.put("/updateManufacturer/:_id", async (req, res) => {
-  console.log(req.params);
-  let data = await Manufacturer.updateOne(req.params, { $set: req.body });
-  res.send(data);
+    console.log(req.params);
+    let data = await Manufacturer.updateOne(req.params, { $set: req.body });
+    res.send(data);
 });
 
 // add spare cable
@@ -214,14 +217,14 @@ app.put("/updateManufacturer/:_id", async (req, res) => {
 
 // get all spare cables
 app.get("/all-spareCables", (req, res) => {
-  spareCable
-    .find()
-    .then((result) => {
-      res.send(result);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+    spareCable
+        .find()
+        .then((result) => {
+            res.send(result);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 });
 
 // add spare kits
@@ -255,14 +258,14 @@ app.get("/all-spareCables", (req, res) => {
 
 // get all spare kit
 app.get("/all-spareKits", (req, res) => {
-  spareKit
-    .find()
-    .then((result) => {
-      res.send(result);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+    spareKit
+        .find()
+        .then((result) => {
+            res.send(result);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 });
 
 app.use(morgan("dev"));
@@ -270,31 +273,40 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accep, Authorization");
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accep, Authorization"
+    );
 
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Method", "PUT, POST, PATCH, DELETE, GET");
-    return res.status(200).json({});
-  }
-  next();
+    if (req.method === "OPTIONS") {
+        res.header(
+            "Access-Control-Allow-Method",
+            "PUT, POST, PATCH, DELETE, GET"
+        );
+        return res.status(200).json({});
+    }
+    next();
 });
 
 app.use("/api/user", userRoutes);
+app.use("/api/spareCable", spareCableRoutes);
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/loading", loadingRoutes);
 
 app.use((req, res, next) => {
-  const error = new Error("Not found");
-  error.status = 400;
-  next(error);
+    const error = new Error("Not found");
+    error.status = 400;
+    next(error);
 });
 
 app.use((error, req, res, next) => {
-  res.status(error.status || 500);
-  res.json({
-    error: {
-      message: error.message,
-    },
-  });
+    res.status(error.status || 500);
+    res.json({
+        error: {
+            message: error.message,
+        },
+    });
 });
 
 module.exports = app;

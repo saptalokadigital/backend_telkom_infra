@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const manufacturerSchema = mongoose.Schema({
-  manufacturer: { type: String, require: true },
+    _id: mongoose.Schema.Types.ObjectId,
+    name: { type: String, require: true },
 });
-const Manufacturer = mongoose.model("id_manufacturer", manufacturerSchema);
-module.exports = Manufacturer;
+module.exports = mongoose.model("manufacturer", manufacturerSchema);

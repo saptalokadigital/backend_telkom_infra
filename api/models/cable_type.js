@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const cableTypeSchema = mongoose.Schema({
-  cable_type: { type: String, require: true },
+    _id: mongoose.Schema.Types.ObjectId,
+    name: { type: String, require: true },
 });
-const cableType = mongoose.model("cable_type", cableTypeSchema);
-module.exports = cableType;
+module.exports = mongoose.model("cable_type", cableTypeSchema);

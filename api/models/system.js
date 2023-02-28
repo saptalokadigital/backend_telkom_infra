@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const systemSchema = mongoose.Schema({
-  system: { type: String, require: true },
+    _id: mongoose.Schema.Types.ObjectId,
+    name: { type: String, require: true },
 });
-const system = mongoose.model("system", systemSchema);
-module.exports = system;
+module.exports = mongoose.model("System", systemSchema);
