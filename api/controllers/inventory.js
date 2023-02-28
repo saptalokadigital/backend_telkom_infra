@@ -30,7 +30,7 @@ exports.getTank = (req, res, next) => {
             },
             {
                 $lookup: {
-                    from: "system",
+                    from: "systems",
                     localField: "system",
                     foreignField: "_id",
                     as: "system",
@@ -42,7 +42,7 @@ exports.getTank = (req, res, next) => {
 
             {
                 $lookup: {
-                    from: "cable_type",
+                    from: "cable_types",
                     localField: "cable_type",
                     foreignField: "_id",
                     as: "cable_type",
@@ -53,7 +53,7 @@ exports.getTank = (req, res, next) => {
             },
             {
                 $lookup: {
-                    from: "armoring_type",
+                    from: "armoring_types",
                     localField: "armoring_type",
                     foreignField: "_id",
                     as: "armoring_type",
@@ -64,7 +64,7 @@ exports.getTank = (req, res, next) => {
             },
             {
                 $lookup: {
-                    from: "core_type",
+                    from: "core_types",
                     localField: "core_type",
                     foreignField: "_id",
                     as: "core_type",
@@ -75,7 +75,7 @@ exports.getTank = (req, res, next) => {
             },
             {
                 $lookup: {
-                    from: "manufacturer",
+                    from: "manufacturers",
                     localField: "manufacturer",
                     foreignField: "_id",
                     as: "manufacturer",
