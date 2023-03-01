@@ -7,9 +7,16 @@ const mongoose = require("mongoose");
 const mongoUrl = "mongodb://127.0.0.1:27017/telkominfra";
 
 const userRoutes = require("./api/routes/user");
+const spareCable = require("./api/models/spare_cable.models");
+const spareKit = require("./api/models/spare_kits");
 const spareCableRoutes = require("./api/routes/spareCable");
 const inventoryRoutes = require("./api/routes/inventory");
 const loadingRoutes = require("./api/routes/loading");
+const cableTypeRoutes = require("./api/routes/master_data/cable_type");
+const coreTypeRoutes = require("./api/routes/master_data/core_type");
+const manufacturerRoutes = require("./api/routes/master_data/manufacturer");
+const armoringTypeRoutes = require("./api/routes/master_data/armoring_type");
+const systemRoutes = require("./api/routes/master_data/system");
 
 mongoose
     .connect(mongoUrl, {
@@ -23,6 +30,98 @@ mongoose
         console.log(e);
         console.log("Gagal Connect Ke Database");
     });
+
+app.use(express.json());
+
+// add spare cable
+// app.get("/add-spareCable", (req, res) => {
+//   const spare_cable = new spareCable({
+//     no: "223",
+//     depo_location: "woyy",
+//     label_id: "wkwk",
+//     system: "wkwk",
+//     cable_type: "wkwk",
+//     manufacturer: "wkwk",
+//     armoring_type: "wkwkkwk",
+//     core_type: "wkwk",
+//     Σ_CORE: "wkwk",
+//     length_report_meter: "wkwk",
+//     length_meas_meter: "wkwk",
+//     doc_reff: "wkwk",
+//     tank_inner: "wkwk",
+//     tank_outter: "wkwk",
+//     tank_level: "wkwk",
+//     remark: "wkwk",
+//     keterangan: "wkwk",
+//     tanggal_validasi: "wkwk",
+//     status_validasi: "wkwk",
+//     tanggal_transaksi: "wkwk",
+//     aktivitas_transaksi: "wkwk",
+//     from_to: "wkwk",
+//     nomor_berita_acara: "wkwk",
+//   });
+//   spare_cable
+//     .save()
+//     .then((result) => {
+//       res.send(result);
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//     });
+// });
+
+// get all spare cables
+app.get("/all-spareCables", (req, res) => {
+    spareCable
+        .find()
+        .then((result) => {
+            res.send(result);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+});
+
+// add spare kits
+// app.get("/add-spareKits", (req, res) => {
+//   const spare_Kit = new spareKit({
+//     no: "1700",
+//     lokasi: "",
+//     nomor_rak: "",
+//     nama_barang: "",
+//     part_number: "",
+//     serial_number: "",
+//     system: "",
+//     weight: "",
+//     qty: "",
+//     unit: "",
+//     keterangan: "",
+//     tanggal_transaksi: "",
+//     aktivitas_transaksi: "",
+//     from_to: "",
+//     nomor_berita_acara: "",
+//   });
+//   spare_Kit
+//     .save()
+//     .then((result) => {
+//       res.send(result);
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//     });
+// });
+
+// get all spare kit
+app.get("/all-spareKits", (req, res) => {
+    spareKit
+        .find()
+        .then((result) => {
+            res.send(result);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+});
 
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -49,6 +148,11 @@ app.use("/api/user", userRoutes);
 app.use("/api/spareCable", spareCableRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/loading", loadingRoutes);
+app.use("/api/cableType", cableTypeRoutes);
+app.use("/api/coreType", coreTypeRoutes);
+app.use("/api/manufacturer", manufacturerRoutes);
+app.use("/api/armoringType", armoringTypeRoutes);
+app.use("/api/system", systemRoutes);
 
 app.use((req, res, next) => {
     const error = new Error("Not found");
