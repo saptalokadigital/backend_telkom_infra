@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 const mongoUrl = "mongodb://127.0.0.1:27017/telkominfra";
 
 const userRoutes = require("./api/routes/user");
-const spareCable = require("./api/models/spare_cable");
+const spareCable = require("./api/models/spare_cable.models");
 const spareKit = require("./api/models/spare_kits");
 const Manufacturer = require("./api/models/manufacturer");
 const ArmoringType = require("./api/models/armoring_type");
