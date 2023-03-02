@@ -17,6 +17,8 @@ const coreTypeRoutes = require("./api/routes/master_data/core_type");
 const manufacturerRoutes = require("./api/routes/master_data/manufacturer");
 const armoringTypeRoutes = require("./api/routes/master_data/armoring_type");
 const systemRoutes = require("./api/routes/master_data/system");
+const locationRoutes = require("./api/routes/master_data/location");
+const unitRoutes = require("./api/routes/master_data/unit");
 
 mongoose
     .connect(mongoUrl, {
@@ -153,6 +155,8 @@ app.use("/api/coreType", coreTypeRoutes);
 app.use("/api/manufacturer", manufacturerRoutes);
 app.use("/api/armoringType", armoringTypeRoutes);
 app.use("/api/system", systemRoutes);
+app.use("/api/location", locationRoutes);
+app.use("/api/unit", unitRoutes);
 
 app.use((req, res, next) => {
     const error = new Error("Not found");
