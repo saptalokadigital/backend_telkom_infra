@@ -27,6 +27,7 @@ exports.signUpNewUser = (req, res, next) => {
                             lastName: req.body.lastName,
                             username: req.body.username,
                             email: req.body.email,
+                            role: req.body.role,
                             password: hash,
                         });
 
@@ -72,6 +73,7 @@ exports.userSignIn = (req, res, next) => {
                             {
                                 username: user[0].username,
                                 userId: user[0]._id,
+                                role: user[0].role,
                             },
                             process.env.JWT_KEY,
                             {
