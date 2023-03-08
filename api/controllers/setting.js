@@ -5,42 +5,51 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 exports.updateUser = async (req, res, next) => {
-    const { firstName, lastName, username, password, role } = req.body;
+    const updatedUserData = req.body;
+    User.findOne(
+        {
+            $or: [{ email: req.body.email }, { username: req.body.username }],
+        },
+        async (err, result) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
 
-    try {
-        const user = await User.findById(req.params.id);
+            const user = await User.findById(req.params.id);
+            const userId = user._id.toString();
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            if (result && result._id.toString() !== userId) {
+                // if a document with the same username exists and it's not the one being updated
+                return res.status(409).json({
+                    message: "Email exists / Username exists",
+                });
+                // handle the error and return a response as needed
+            } else {
+                // update the user's data
+                User.updateOne(
+                    { _id: userId },
+                    { $set: updatedUserData },
+                    (err, result) => {
+                        if (err) {
+                            return res.status(409).json({
+                                message: "Email exists / Username exists",
+                            });
+                        }
+                        res.status(201).json({
+                            message: "User updated successfuly..",
+                            user: user,
+                        });
+
+                        // return a response as needed
+                    }
+                );
+            }
         }
-
-        // Update fields if new values are provided
-        if (firstName) {
-            user.firstName = firstName;
-        }
-        if (lastName) {
-            user.lastName = lastName;
-        }
-
-        if (username) {
-            user.username = username;
-        }
-
-        if (password) {
-            const salt = await bcrypt.genSalt(10);
-            user.password = await bcrypt.hash(password, salt);
-        }
-
-        if (role) {
-            user.role = role;
-        }
-
-        await user.save();
-        res.json(user);
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).send("Server Error");
-    }
+    );
 };
 
 exports.getUser = async (req, res, next) => {
