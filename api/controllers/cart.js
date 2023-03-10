@@ -129,7 +129,6 @@ exports.deleteAllCartCables = async (req, res, next) => {
                 { $set: { cartCable: [] } }
             );
             console.log(updatedUser);
-            // await updatedUser.save();
             return res.status(200).send({ message: "Cart cleared." });
         });
     } catch (error) {
