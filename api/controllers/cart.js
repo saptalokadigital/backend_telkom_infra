@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
 const User = require("../models/user");
 const spareCableModel = require("../models/spare_cable.models");
+const spareKit = require("../models/spare_kits");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-exports.addToCart = async (req, res, next) => {
+// Add cable to cart
+exports.addToCartCable = async (req, res, next) => {
     try {
         const authHeader = req.headers["authorization"];
         const token = authHeader && authHeader.split(" ")[1];
@@ -40,7 +42,7 @@ exports.addToCart = async (req, res, next) => {
     }
 };
 
-// make a function to get all the cables in the cart
+// Make a function to get all the cables in the cart
 exports.getCartCables = async (req, res, next) => {
     try {
         const authHeader = req.headers["authorization"];
@@ -69,8 +71,8 @@ exports.getCartCables = async (req, res, next) => {
     }
 };
 
-// make a function to remove a cable from the cart
-exports.removeFromCart = async (req, res, next) => {
+// Make a function to remove a cable from the cart
+exports.removeFromCartCable = async (req, res, next) => {
     try {
         const authHeader = req.headers["authorization"];
         const token = authHeader && authHeader.split(" ")[1];
@@ -109,7 +111,7 @@ exports.removeFromCart = async (req, res, next) => {
     }
 };
 
-// make a function to remove all cables from the cart
+// Make a function to remove all cables from the cart
 exports.deleteAllCartCables = async (req, res, next) => {
     try {
         const authHeader = req.headers["authorization"];
@@ -130,6 +132,43 @@ exports.deleteAllCartCables = async (req, res, next) => {
             );
             console.log(updatedUser);
             return res.status(200).send({ message: "Cart cleared." });
+        });
+    } catch (error) {
+        return res.status(500).send({
+            auth: false,
+            message: "Failed to authenticate token outside.",
+        });
+    }
+};
+
+//make a function to add a kit to the cart
+exports.addToCartKit = async (req, res, next) => {
+    try {
+        const authHeader = req.headers["authorization"];
+        const token = authHeader && authHeader.split(" ")[1];
+        kitId = req.body.kitId;
+
+        if (!token)
+            return res
+                .status(401)
+                .send({ auth: false, message: "No token provided." });
+        jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
+            if (err)
+                return res.status(500).send({
+                    auth: false,
+                    message: "Failed to authenticate token inside.",
+                });
+            const user = await User.findById(decoded.userId);
+            // check if kit is already in cart
+            if (user.cartKit.includes(kitId)) {
+                return res.status(409).send({
+                    message: "Kit already in cart.",
+                });
+            }
+
+            await user.cartKit.push(kitId);
+            await user.save();
+            return res.status(200).send({ message: "Kit added to cart." });
         });
     } catch (error) {
         return res.status(500).send({

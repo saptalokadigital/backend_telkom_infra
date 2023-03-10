@@ -18,5 +18,11 @@ const userSchema = mongoose.Schema({
             ref: "spare_cable",
         },
     ],
+    cartKits: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "spare_kit",
+        },
+    ],
 });
 module.exports = mongoose.model("User", userSchema);
