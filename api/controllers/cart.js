@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const User = require("../models/user");
 const spareCableModel = require("../models/spare_cable.models");
-const spareKit = require("../models/spare_kits");
+const kitModel = require("../models/spare_kits");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
@@ -141,6 +141,7 @@ exports.deleteAllCartCables = async (req, res, next) => {
     }
 };
 
+// Cart Kit
 //make a function to add a kit to the cart
 exports.addToCartKit = async (req, res, next) => {
     try {
@@ -169,6 +170,102 @@ exports.addToCartKit = async (req, res, next) => {
             await user.cartKit.push(kitId);
             await user.save();
             return res.status(200).send({ message: "Kit added to cart." });
+        });
+    } catch (error) {
+        return res.status(500).send({
+            auth: false,
+            message: "Failed to authenticate token outside.",
+        });
+    }
+};
+// make a function to get all the kits in the cart
+exports.getCartKits = async (req, res, next) => {
+    try {
+        const authHeader = req.headers["authorization"];
+        const token = authHeader && authHeader.split(" ")[1];
+        if (!token)
+            return res
+                .status(401)
+                .send({ auth: false, message: "No token provided." });
+        jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
+            if (err)
+                return res.status(500).send({
+                    auth: false,
+                    message: "Failed to authenticate token inside.",
+                });
+            const user = await User.findById(decoded.userId);
+            const cartKits = await kitModel.find({
+                _id: { $in: user.cartKit },
+            });
+            return res.status(200).send({ cartKits });
+        });
+    } catch (error) {
+        return res.status(500).send({
+            auth: false,
+            message: "Failed to authenticate token outside.",
+        });
+    }
+};
+
+// make a function to remove a kit from the cart
+exports.removeFromCartKit = async (req, res, next) => {
+    try {
+        const authHeader = req.headers["authorization"];
+        const token = authHeader && authHeader.split(" ")[1];
+        kitId = req.params.kitId;
+
+        if (!token)
+            return res
+                .status(401)
+                .send({ auth: false, message: "No token provided." });
+        jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
+            if (err)
+                return res.status(500).send({
+                    auth: false,
+                    message: "Failed to authenticate token inside.",
+                });
+            const user = await User.findById(decoded.userId);
+
+            // check if kit is already in cart
+            if (!user.cartKit.includes(kitId)) {
+                return res.status(409).send({
+                    message: "Kit not in cart.",
+                });
+            }
+
+            await user.cartKit.pull(kitId);
+            await user.save();
+            return res.status(200).send({ message: "Kit removed from cart." });
+        });
+    } catch (error) {
+        return res.status(500).send({
+            auth: false,
+            message: "Failed to authenticate token outside.",
+        });
+    }
+};
+
+// make a function to remove all kits from the cart
+exports.deleteAllCartKits = async (req, res, next) => {
+    try {
+        const authHeader = req.headers["authorization"];
+        const token = authHeader && authHeader.split(" ")[1];
+        if (!token)
+            return res
+                .status(401)
+                .send({ auth: false, message: "No token provided." });
+        jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
+            if (err)
+                return res.status(500).send({
+                    auth: false,
+                    message: "Failed to authenticate token inside.",
+                });
+            const updatedUser = await User.updateOne(
+                { _id: decoded.userId },
+                { $set: { cartKit: [] } }
+            );
+            console.log(updatedUser);
+            return res.status(200).send({ message: "Cart cleared." });
         });
     } catch (error) {
         return res.status(500).send({
