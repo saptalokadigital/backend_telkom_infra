@@ -23,6 +23,8 @@ const systemRoutes = require("./api/routes/master_data/system");
 const perusahaanRoutes = require("./api/routes/master_data/perusahaan");
 const locationRoutes = require("./api/routes/master_data/location");
 const unitRoutes = require("./api/routes/master_data/unit");
+const settingRoutes = require("./api/routes/setting");
+const cartRoutes = require("./api/routes/cart");
 
 
 mongoose
@@ -159,6 +161,8 @@ app.use("/api/spareKit", spareKitRoutes);
 app.use("/api/perusahaan", perusahaanRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/unit", unitRoutes);
+app.use("/api/setting", settingRoutes);
+app.use("/api/cart", cartRoutes);
 
 
 app.use((req, res, next) => {

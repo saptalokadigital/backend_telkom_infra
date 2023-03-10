@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const SystemController = require("../../controllers/master_data/system");
 const auth = require("../../middleware/auth");
+const checkRole = require("../../middleware/multi_roles");
 
 router.post("/", SystemController.postSystem);
 router.get("/", SystemController.getAllSystem);

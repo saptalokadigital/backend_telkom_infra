@@ -7,12 +7,14 @@ require("dotenv").config();
 
 // Create new user or Sign up
 exports.signUpNewUser = (req, res, next) => {
-    User.find({ email: req.body.email })
+    User.find({
+        $or: [{ email: req.body.email }, { username: req.body.username }],
+    })
         .exec()
         .then((user) => {
             if (user.length >= 1) {
                 return res.status(409).json({
-                    message: "Email exists",
+                    message: "Email exists / Username exists",
                 });
             } else {
                 bcrypt.hash(req.body.password, 10, (err, hash) => {
@@ -23,10 +25,10 @@ exports.signUpNewUser = (req, res, next) => {
                     } else {
                         const user = new User({
                             _id: new mongoose.Types.ObjectId(),
-                            firstName: req.body.firstName,
-                            lastName: req.body.lastName,
+                            name: req.body.name,
                             username: req.body.username,
                             email: req.body.email,
+                            role: req.body.role,
                             password: hash,
                         });
 
@@ -72,6 +74,7 @@ exports.userSignIn = (req, res, next) => {
                             {
                                 username: user[0].username,
                                 userId: user[0]._id,
+                                role: user[0].role,
                             },
                             process.env.JWT_KEY,
                             {
