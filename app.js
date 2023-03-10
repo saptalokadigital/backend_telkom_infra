@@ -20,6 +20,7 @@ const systemRoutes = require("./api/routes/master_data/system");
 const locationRoutes = require("./api/routes/master_data/location");
 const unitRoutes = require("./api/routes/master_data/unit");
 const settingRoutes = require("./api/routes/setting");
+const cartRoutes = require("./api/routes/cart");
 
 mongoose
     .connect(mongoUrl, {
@@ -159,6 +160,7 @@ app.use("/api/system", systemRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/unit", unitRoutes);
 app.use("/api/setting", settingRoutes);
+app.use("/api/cart", cartRoutes);
 
 app.use((req, res, next) => {
     const error = new Error("Not found");

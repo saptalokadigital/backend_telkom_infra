@@ -30,23 +30,33 @@ exports.updateUser = async (req, res, next) => {
                 // handle the error and return a response as needed
             } else {
                 // update the user's data
-                User.updateOne(
-                    { _id: userId },
-                    { $set: updatedUserData },
-                    (err, result) => {
-                        if (err) {
-                            return res.status(409).json({
-                                message: "Email exists / Username exists",
-                            });
-                        }
-                        res.status(201).json({
-                            message: "User updated successfuly..",
-                            user: user,
+                bcrypt.hash(req.body.password, 10, (err, hash) => {
+                    if (err) {
+                        return res.status(500).json({
+                            error: err,
                         });
+                    } else {
+                        updatedUserData.password = hash;
+                        User.updateOne(
+                            { _id: userId },
+                            { $set: updatedUserData },
+                            (err, result) => {
+                                if (err) {
+                                    return res.status(409).json({
+                                        message:
+                                            "Email exists / Username exists",
+                                    });
+                                }
+                                res.status(201).json({
+                                    message: "User updated successfuly..",
+                                    user: updatedUserData,
+                                });
 
-                        // return a response as needed
+                                // return a response as needed
+                            }
+                        );
                     }
-                );
+                });
             }
         }
     );
