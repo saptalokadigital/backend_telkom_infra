@@ -9,4 +9,5 @@ router.get("/", spareCableController.getCablePopulate);
 router.post("/", spareCableController.createSpareCable);
 router.delete("/:_id", spareCableController.deleteSpareCable);
 router.put("/:_id", spareCableController.editSpareCable);
+router.put("/move/:_id", spareCableController.moveSpareCable);
 module.exports = router;
