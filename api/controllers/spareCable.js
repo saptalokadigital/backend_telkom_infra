@@ -166,51 +166,45 @@ exports.createSpareCable = async (req, res, next) => {
 };
 
 exports.moveSpareCable = async (req, res, next) => {
-    const { cableId } = req.params;
-    const { fromTank, toTank } = req.body;
+    const cableId = req.params;
+    const { toTank } = req.body;
 
-    const cable = await db.dashboard_cable.findOne({ _id: cableId });
-    const fromLevel = cable.tank_level;
+    const cable = await spareCableModel.findOne({ _id: cableId });
 
     let fieldInTank = "";
-    if (cable) {
-        if (cable.hasOwnProperty("tank_inner")) {
-            // do something if the cable has tank_inner field
-
-            fieldInTank = "tank_inner";
-        } else if (cable.hasOwnProperty("tank_outer")) {
-            // do something if the cable has tank_outer field
-
-            fieldInTank = "tank_outer";
-        } else {
-            // do something if the cable has neither tank_inner nor tank_outer field
-            return res.status(404).send("Cable does not have tank field");
-        }
-    } else {
+    // return res.send(`${cable.tank === "outer"}`);
+    if (!cable) {
         // do something if the cable is not found
         return res.status(404).send("Cable not found");
     }
+    // return res.send(fieldInTank);
 
-    const cablesInFromTank = await db.dashboard_cable
+    const cablesInFromTank = await spareCableModel
         .find({
-            [fieldInTank]: fromTank,
-            tank_level: { $gt: fromLevel },
+            tank: cable.tank,
+            tank_location: cable.tank_location,
+            tank_level: { $gt: cable.tank_level },
         })
         .sort({ tank_level: -1 });
-
+    // return res.send(cablesInFromTank);
     if (cablesInFromTank.length > 0) {
-        const moveToTank = fromTank < "TANK-6" ? "TANK-6" : "TANK-1";
-        const highestLevelCable = await db.dashboard_cable
-            .findOne({ fieldInTank: toTank })
-            .sort({ tank_level: -1 });
+        const moveToTank = cable.tank_location < "TANK-6" ? "TANK-6" : "TANK-1";
 
+        const highestLevelCable = await spareCableModel
+            .findOne({
+                tank_location: moveToTank,
+                tank: cable.tank,
+            })
+            .sort({ tank_level: -1 });
         let highestLevel = highestLevelCable ? highestLevelCable.tank_level : 0;
+
         for (const higherCable of cablesInFromTank) {
-            await db.dashboard_cable.updateOne(
+            await spareCableModel.updateOne(
                 { _id: higherCable._id },
                 {
                     $set: {
-                        [fieldInTank]: moveToTank,
+                        tank_location: moveToTank,
+                        tank: higherCable.tank,
                         tank_level: highestLevel + 1,
                     },
                 }
@@ -220,15 +214,22 @@ exports.moveSpareCable = async (req, res, next) => {
     }
 
     // Update the current cable to the new tank and level
-    const cablesInToTank = await db.dashboard_cable
-        .find({ [fieldInTank]: toTank })
+    const cablesInToTank = await spareCableModel
+        .find({ tank: cable.tank, tank_location: toTank })
+
         .sort({ tank_level: -1 });
     const highestLevelCable = cablesInToTank[0];
     const highestLevel = highestLevelCable ? highestLevelCable.tank_level : 0;
     const newLevel = highestLevel + 1;
-    await db.dashboard_cable.updateOne(
+    await spareCableModel.updateOne(
         { _id: cableId },
-        { $set: { [fieldInTank]: toTank, tank_level: newLevel } }
+        {
+            $set: {
+                tank_location: toTank,
+                tank_level: newLevel,
+                tank: fieldInTank,
+            },
+        }
     );
 
     res.send("Cable moved successfully");

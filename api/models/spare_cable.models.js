@@ -35,10 +35,10 @@ const spareCableSchema = new Schema({
     doc_reff: {
         type: Object,
     },
-    tank_outer: {
+    tank: {
         type: String,
     },
-    tank_inner: {
+    tank_location: {
         type: String,
     },
     tank_level: {

@@ -17,15 +17,7 @@ exports.getTank = (req, res, next) => {
         .aggregate([
             {
                 $match: {
-                    $or: [
-                        {
-                            tank_outer: `${req.params.tank}`,
-                        },
-
-                        {
-                            tank_inner: `${req.params.tank}`,
-                        },
-                    ],
+                    tank_location: `${req.params.tank}`,
                 },
             },
             {
@@ -92,8 +84,8 @@ exports.getTank = (req, res, next) => {
                     core_type: "$core_type.core_type",
                     manufacturer: "$manufacturer.manufacturer",
                     system: "$system.system",
-                    tank_outer: 1,
-                    tank_inner: 1,
+                    tank: 1,
+                    tank_location: 1,
                     length_report: 1,
                     length_meas: 1,
                     doc_reff: 1,
