@@ -170,6 +170,7 @@ app.use("/api/unit", unitRoutes);
 app.use("/api/setting", settingRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/updatingSpareCable", updatingSpareCableRoutes);
+app.use("/api/loading", loadingRoutes);
 
 app.use((req, res, next) => {
     const error = new Error("Not found");

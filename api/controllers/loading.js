@@ -1,7 +1,7 @@
 const loadingModel = require("../models/loading.models");
 require("dotenv").config();
 
-exports.postLoading = async (req, res, next) => {
+exports.addCableToLoading = async (req, res, next) => {
     const { cables_id } = req.body;
     if (cables_id > 0) {
         const isValidIds = comments.every((cables_id) =>
@@ -48,4 +48,16 @@ exports.getLoadingById = async (req, res, next) => {
             message: "Something went wrong!",
         });
     }
+};
+
+exports.postLoading = async (req, res, next) => {
+    let data = new loadingModel(req.body);
+    const result = await data.save();
+    res.send(result);
+};
+
+//get all loading
+exports.getLoading = async (req, res, next) => {
+    const loading = await loadingModel.find();
+    res.send(loading);
 };

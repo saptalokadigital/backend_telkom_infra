@@ -274,3 +274,47 @@ exports.deleteAllCartKits = async (req, res, next) => {
         });
     }
 };
+
+// Get Turn Over Cable From Cart
+exports.getTurnOverCableFromCart = async (req, res, next) => {
+    try {
+        const authHeader = req.headers["authorization"];
+        const token = authHeader && authHeader.split(" ")[1];
+        if (!token)
+            return res
+                .status(401)
+                .send({ auth: false, message: "No token provided." });
+        jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
+            if (err)
+                return res.status(500).send({
+                    auth: false,
+                    message: "Failed to authenticate token inside.",
+                });
+            const user = await User.findById(decoded.userId);
+            const cartCables = await spareCableModel.find({
+                _id: { $in: user.cartCable },
+            });
+
+            // return res.status(200).send({ cartCables });
+            // loop for every cable in cartCables
+
+            const turnOver = await Promise.all(
+                cartCables.map(async (cable) => {
+                    return await spareCableModel
+                        .find({
+                            tank: cable.tank,
+                            tank_location: cable.tank_location,
+                            tank_level: { $gt: cable.tank_level },
+                        })
+                        .sort({ tank_level: -1 });
+                })
+            );
+            return res.status(200).send({ turnOver });
+        });
+    } catch (error) {
+        return res.status(500).send({
+            auth: false,
+            message: "Failed to authenticate token outside.",
+        });
+    }
+};

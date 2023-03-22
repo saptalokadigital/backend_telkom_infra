@@ -15,4 +15,11 @@ router.get("/getCartKits", auth, cartController.getCartKits);
 router.delete("/deleteKit/:kitId", auth, cartController.removeFromCartKit);
 router.delete("/deleteAllKit", auth, cartController.deleteAllCartKits);
 
+// Cart Turn Over
+router.get(
+    "/getTurnOverCableFromCart",
+    auth,
+    cartController.getTurnOverCableFromCart
+);
+
 module.exports = router;
