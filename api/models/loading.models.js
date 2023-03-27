@@ -6,6 +6,7 @@ const loadingSchema = mongoose.Schema({
     cables_turnover_id: [
         { type: mongoose.Schema.Types.ObjectId, ref: "spare_cable" },
     ],
+
     project_name: { type: String, require: true },
     vessel_name: { type: String, require: true },
     remark: { type: String },

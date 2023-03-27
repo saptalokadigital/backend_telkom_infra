@@ -275,6 +275,66 @@ exports.deleteAllCartKits = async (req, res, next) => {
     }
 };
 
+exports.getCartAll = async (req, res, next) => {
+    try {
+        const authHeader = req.headers["authorization"];
+        const token = authHeader && authHeader.split(" ")[1];
+        if (!token)
+            return res
+                .status(401)
+                .send({ auth: false, message: "No token provided." });
+        jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
+            if (err)
+                return res.status(500).send({
+                    auth: false,
+                    message: "Failed to authenticate token inside.",
+                });
+            const user = await User.findById(decoded.userId);
+            const cartKits = await kitModel.find({
+                _id: { $in: user.cartKit },
+            });
+            const cartCables = await spareCableModel.find({
+                _id: { $in: user.cartCable },
+            });
+            return res.status(200).send({ cartKits, cartCables });
+        });
+    } catch (error) {
+        return res.status(500).send({
+            auth: false,
+            message: "Failed to authenticate token outside.",
+        });
+    }
+};
+
+exports.deleteAllCart = async (req, res, next) => {
+    try {
+        const authHeader = req.headers["authorization"];
+        const token = authHeader && authHeader.split(" ")[1];
+        if (!token)
+            return res
+                .status(401)
+                .send({ auth: false, message: "No token provided." });
+        jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
+            if (err)
+                return res.status(500).send({
+                    auth: false,
+                    message: "Failed to authenticate token inside.",
+                });
+            const updatedUser = await User.updateOne(
+                { _id: decoded.userId },
+                { $set: { cartKit: [], cartCable: [] } }
+            );
+            console.log(updatedUser);
+            return res.status(200).send({ message: "Cart cleared." });
+        });
+    } catch (error) {
+        return res.status(500).send({
+            auth: false,
+            message: "Failed to authenticate token outside.",
+        });
+    }
+};
+
 // Get Turn Over Cable From Cart
 exports.getTurnOverCableFromCart = async (req, res, next) => {
     try {
@@ -309,7 +369,23 @@ exports.getTurnOverCableFromCart = async (req, res, next) => {
                         .sort({ tank_level: -1 });
                 })
             );
-            return res.status(200).send({ turnOver });
+
+            const flattenedTurnOver = turnOver.flat(1);
+
+            const uniqueTurnOver = turnOver.flat().reduce((acc, cable) => {
+                if (
+                    !cartCables.some((cartCable) => cartCable.id === cable.id)
+                ) {
+                    if (
+                        !acc.some((uniqueCable) => uniqueCable.id === cable.id)
+                    ) {
+                        acc.push(cable);
+                    }
+                }
+                return acc;
+            }, []);
+
+            return res.status(200).send({ uniqueTurnOver });
         });
     } catch (error) {
         return res.status(500).send({

@@ -1,4 +1,5 @@
 const spareCableModel = require("../models/spare_cable.models");
+const spareKitModel = require("../models/spare_kits");
 require("dotenv").config();
 
 exports.getTank = (req, res, next) => {
@@ -91,6 +92,60 @@ exports.getTank = (req, res, next) => {
                     doc_reff: 1,
                     tank_level: 1,
                     label_id: 1,
+                },
+            },
+        ])
+        .exec(function (err, cables) {
+            if (err) {
+                res.send("error has occured");
+            } else {
+                console.log(cables);
+                res.json(cables);
+            }
+        });
+};
+exports.getTankKits = (req, res, next) => {
+    // .find({
+    //     $or: [
+    //         {
+    //             tank_outer: `${req.params.tank}`,
+    //         },
+    //         {
+    //             tank_inner: `${req.params.tank}`,
+    //         },
+    //     ],
+    // })
+    spareKitModel
+        .aggregate([
+            {
+                $match: {
+                    rak_number: `${req.params.tank}`,
+                },
+            },
+            {
+                $lookup: {
+                    from: "systems",
+                    localField: "system",
+                    foreignField: "_id",
+                    as: "system",
+                },
+            },
+            {
+                $unwind: "$system",
+            },
+
+            {
+                $project: {
+                    _id: 1,
+                    no: 1,
+                    rak_number: 1,
+                    item_name: 1,
+                    part_number: 1,
+                    serial_number: 1,
+                    system: "$system.system",
+                    weight_kg: 1,
+                    qty: 1,
+                    unit: 1,
                 },
             },
         ])

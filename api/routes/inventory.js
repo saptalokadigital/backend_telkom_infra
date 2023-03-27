@@ -3,6 +3,7 @@ const router = express.Router();
 const inventoryController = require("../controllers/inventory");
 const auth = require("../middleware/auth");
 
-router.get("/:tank", inventoryController.getTank);
+router.get("/cable/:tank", inventoryController.getTank);
+router.get("/kit/:tank", inventoryController.getTankKits);
 
 module.exports = router;
