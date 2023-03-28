@@ -1,5 +1,9 @@
 const loadingModel = require("../models/loading.models");
 const spareCableModel = require("../models/spare_cable.models");
+const submittedCableModel = require("../models/submitted_cable");
+const submittedKitModel = require("../models/submitted_kit");
+const submittedTurnoverModel = require("../models/submitted_turnover");
+const spareKitModel = require("../models/spare_kits");
 require("dotenv").config();
 
 exports.addCableToLoading = async (req, res, next) => {
@@ -20,6 +24,7 @@ exports.addCableToLoading = async (req, res, next) => {
         if (loading.cables_id.includes(cables_id)) {
             return res.status(400).json({
                 message: "Cable already added to the loading!",
+                loading: loading,
             });
         }
         loading.cables_id.push(cables_id);
@@ -326,4 +331,108 @@ exports.getTurnoverByLoadingId = async (req, res, next) => {
             message: "Something went wrong!",
         });
     }
+};
+
+// loading submittion belum beres
+exports.loadingSubmittion = async (req, res, next) => {
+    try {
+        const loading = await loadingModel.findById(req.params.loadingId);
+        if (!loading) {
+            return res.status(404).json({
+                message: "Loading not found!",
+            });
+        }
+
+        //check if loading is empty
+        if (loading.cables_id.length === 0) {
+            return res.status(400).json({
+                message: "Loading cables is empty!",
+            });
+        }
+
+        // move the cable from spare cable to submitted cable
+        const cables = await spareCableModel.find({
+            _id: { $in: loading.cables_id },
+        });
+
+        const turnOver = await Promise.all(
+            cables.map(async (cable) => {
+                return await spareCableModel
+                    .find({
+                        tank: cable.tank,
+                        tank_location: cable.tank_location,
+                        tank_level: { $gt: cable.tank_level },
+                    })
+                    .sort({ tank_level: -1 });
+            })
+        );
+
+        const uniqueTurnOver = turnOver.flat().reduce((acc, cable) => {
+            if (!cables.some((c) => c.id === cable.id)) {
+                if (!acc.some((uniqueCable) => uniqueCable.id === cable.id)) {
+                    acc.push(cable);
+                }
+            }
+            return acc;
+        }, []);
+        // loop for every cable in turnOver and push it to submitted_turnover model
+        await Promise.all(
+            uniqueTurnOver.map(async (cable) => {
+                const cableObj = cable.toObject();
+                delete cableObj._id;
+                const submittedTurnOver = new submittedTurnoverModel(cableObj);
+
+                await submittedTurnOver.save();
+                //add submitted turnover id to submitted_turnover
+                loading.submitted_cables_turnover.push(submittedTurnOver);
+            })
+        );
+
+        // loop for every cable in cables
+        await Promise.all(
+            cables.map(async (cable) => {
+                const cableObj = cable.toObject();
+                delete cableObj._id;
+                // create new submitted cable
+                const submittedCable = new submittedCableModel(cableObj);
+                // save submitted cable in the database
+                await submittedCable.save();
+                // delete cable from spare cable
+                await spareCableModel.findByIdAndDelete(cable._id);
+                // add submitted cable to submitted_cables
+                loading.submitted_cables.push(submittedCable);
+            })
+        );
+        await loading.save();
+        // move the kit from spare kit to submitted kit
+        const kits = await spareKitModel.find({
+            _id: { $in: loading.kits_id },
+        });
+        // loop for every kit in kits
+        await Promise.all(
+            kits.map(async (kit) => {
+                const kitObj = kit.toObject();
+                delete kitObj._id;
+                // create new submitted kit
+                const submittedKit = new submittedKitModel(kitObj);
+                // save submitted kit in the database
+                await submittedKit.save();
+                // delete kit from spare kit
+                await spareKitModel.findByIdAndDelete(kit._id);
+                // add submitted kit to submitted_kits
+                loading.submitted_kits.push(submittedKit);
+            })
+        );
+
+        // remove the cable and kit id from the array
+        loading.cables_id = [];
+        loading.kits_id = [];
+        // save loading in the database
+
+        await loading.save();
+        res.status(201).json({
+            message: "Loading submittion successfully!",
+            loading: loading,
+        });
+    } catch (error) {}
 };

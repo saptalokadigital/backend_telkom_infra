@@ -26,6 +26,7 @@ const unitRoutes = require("./api/routes/master_data/unit");
 const settingRoutes = require("./api/routes/setting");
 const cartRoutes = require("./api/routes/cart");
 const updatingSpareCableRoutes = require("./api/routes/updateSpareCable");
+const offloadingRoutes = require("./api/routes/offloading");
 
 mongoose
     .connect(mongoUrl, {
@@ -171,6 +172,7 @@ app.use("/api/setting", settingRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/updatingSpareCable", updatingSpareCableRoutes);
 app.use("/api/loading", loadingRoutes);
+app.use("/api/offloading", offloadingRoutes);
 
 app.use((req, res, next) => {
     const error = new Error("Not found");

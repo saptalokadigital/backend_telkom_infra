@@ -21,6 +21,8 @@ router.delete(
     loadingController.deleteAllCableAndKitFromLoading
 );
 
+router.post("/submit/:loadingId", loadingController.loadingSubmittion);
+
 router.get("/turnover/:loadingId", loadingController.getTurnoverByLoadingId);
 
 module.exports = router;

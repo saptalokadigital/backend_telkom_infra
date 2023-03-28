@@ -188,11 +188,18 @@ exports.moveSpareCable = async (req, res, next) => {
         .sort({ tank_level: -1 });
     // return res.send(cablesInFromTank);
     if (cablesInFromTank.length > 0) {
-        const moveToTank = cable.tank_location < "TANK-6" ? "TANK-6" : "TANK-1";
+        if (!toTank) {
+            toTank =
+                cable.tank_location === "TANK-2" ||
+                cable.tank_location === "TANK-3" ||
+                cable.tank_location === "TANK-10"
+                    ? "TANK-6"
+                    : "TANK-1";
+        }
 
         const highestLevelCable = await spareCableModel
             .findOne({
-                tank_location: moveToTank,
+                tank_location: toTank,
                 tank: cable.tank,
             })
             .sort({ tank_level: -1 });
@@ -203,7 +210,7 @@ exports.moveSpareCable = async (req, res, next) => {
                 { _id: higherCable._id },
                 {
                     $set: {
-                        tank_location: moveToTank,
+                        tank_location: toTank,
                         tank: higherCable.tank,
                         tank_level: highestLevel + 1,
                     },
