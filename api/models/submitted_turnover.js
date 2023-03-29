@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const uniqueValidator = require("mongoose-unique-validator");
 
-const spareCableSchema = new Schema({
+const submittedTurnoverSchema = new Schema({
     no: {
         type: Number,
     },
@@ -69,7 +69,7 @@ const spareCableSchema = new Schema({
     },
 });
 
-spareCableSchema.set("toJSON", {
+submittedTurnoverSchema.set("toJSON", {
     transform: (document, returnedObject) => {
         returnedObject.id = returnedObject._id.toString();
         delete returnedObject._id;
@@ -78,9 +78,12 @@ spareCableSchema.set("toJSON", {
     },
 });
 
-spareCableSchema.plugin(uniqueValidator, {
+submittedTurnoverSchema.plugin(uniqueValidator, {
     message: "Email/Username already in use.",
 });
 
-const spareCableModel = mongoose.model("spare_cable", spareCableSchema);
-module.exports = spareCableModel;
+const submittedTurnoverModel = mongoose.model(
+    "submitted_turnover",
+    submittedTurnoverSchema
+);
+module.exports = submittedTurnoverModel;
