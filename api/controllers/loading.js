@@ -388,6 +388,13 @@ exports.loadingSubmittion = async (req, res, next) => {
             })
         );
 
+        await Promise.all(
+            turnOver.flat().map(async (cable) => {
+                cable.tank_level = cable.tank_level - 1;
+                await cable.save();
+            })
+        );
+
         // loop for every cable in cables
         await Promise.all(
             cables.map(async (cable) => {

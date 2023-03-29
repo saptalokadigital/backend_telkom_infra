@@ -67,6 +67,10 @@ const submittedCableSchema = new Schema({
     E_core: {
         type: Number,
     },
+    is_offloaded: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 submittedCableSchema.set("toJSON", {

@@ -21,6 +21,7 @@ const submittedKitsSchema = new Schema({
     aktivitas_transaksi: { type: String },
     from_to: { type: String },
     nomor_berita_acara: { type: String },
+    is_offloaded: { type: Boolean, default: false },
 });
 
 submittedKitsSchema.set("toJSON", {
