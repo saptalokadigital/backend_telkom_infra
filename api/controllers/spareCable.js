@@ -240,6 +240,5 @@ exports.moveSpareCable = async (req, res, next) => {
       },
     }
   );
-
   res.send("Cable moved successfully");
 };
