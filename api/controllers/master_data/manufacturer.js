@@ -1,26 +1,80 @@
 const Manufacturer = require("../../models/manufacturer");
 require("dotenv").config();
 
-exports.postManufacturer = async (req, res, next) => {
-    let data = new Manufacturer(req.body);
-    const result = await data.save();
-    res.send(result);
-};
+exports.postManufacturer = (data) =>
+  new Promise((resolve, reject) => {
+    Manufacturer.create(data)
+      .then(() => {
+        resolve({
+          sukses: true,
+          msg: "Added Manufacturer succesfully",
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to added Manufacturer data",
+        });
+      });
+  });
 
-exports.getAllManufacturer = async (req, res, next) => {
-    let data = await Manufacturer.find();
-    res.send(data);
-};
+exports.getAllManufacturer = () =>
+  new Promise((resolve, reject) => {
+    Manufacturer.find({})
+      .then((res) => {
+        resolve({
+          sukses: true,
+          msg: "Get Manufacturer succesfully",
+          data: res,
+        });
+      })
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to get Manufacturer data",
+          data: [],
+        })
+      );
+  });
 
-exports.deleteManufacturer = async (req, res, next) => {
-    console.log(req.params);
-    let data = await Manufacturer.deleteOne(req.params);
+exports.deleteManufacturer = (id) =>
+  new Promise((resolve, reject) => {
+    Manufacturer.deleteOne({
+      _id: id,
+    })
+      .then(() =>
+        resolve({
+          sukses: true,
+          msg: "Deleted Manufacturer succesfully",
+        })
+      )
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to deleted Manufacturer data",
+        })
+      );
+  });
 
-    res.send(data);
-};
-
-exports.editManufacturer = async (req, res, next) => {
-    console.log(req.params);
-    let data = await Manufacturer.updateOne(req.params, { $set: req.body });
-    res.send(data);
-};
+exports.editManufacturer = (id, data) =>
+  new Promise((resolve, reject) => {
+    Manufacturer.updateOne(
+      {
+        _id: id,
+      },
+      data
+    )
+      .then(() =>
+        resolve({
+          sukses: true,
+          msg: "Edited Manufacturer succesfully",
+        })
+      )
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to edited Manufacturer data",
+        })
+      );
+  });

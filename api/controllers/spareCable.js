@@ -2,23 +2,39 @@ const spareCableModel = require("../models/spare_cable.models");
 require("dotenv").config();
 
 exports.postSpareCable = async (req, res, next) => {
+  try {
     let data = new spareCableModel(req.body);
     const result = await data.save();
-    res.send(result);
+    return res.status(200).send({ result, message: "Added spare cable succesfully" });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ooopps, Failed to added spare cable data",
+    });
+  }
 };
 
 exports.deleteSpareCable = async (req, res, next) => {
+  try {
     console.log(req.params);
-    let data = await spareCableModel.deleteOne(req.params);
-
-    res.send(data);
+    await spareCableModel.deleteOne(req.params);
+    return res.status(200).send({ message: "Deleted spare cable succesfully" });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ooopps, Failed to deleted spare cable data",
+    });
+  }
 };
 
 exports.editSpareCable = async (req, res, next) => {
+  try {
     console.log(req.params);
-    let data = await spareCableModel.updateOne(req.params, { $set: req.body });
-    res.send(data);
-};
+    await spareCableModel.updateOne(req.params, { $set: req.body });
+    return res.status(200).send({ message: "Updated spare cable succesfully" });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ooopps, Failed to updated spare cable data",
+    });
+  }
 
 exports.getAll = (req, res, next) => {
     spareCableModel.find({}).exec(function (err, cables) {

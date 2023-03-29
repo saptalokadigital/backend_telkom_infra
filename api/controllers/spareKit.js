@@ -2,22 +2,38 @@ const spareKitModel = require("../models/spare_kits");
 require("dotenv").config();
 
 exports.postSpareKit = async (req, res, next) => {
-  let data = new spareKitModel(req.body);
-  const result = await data.save();
-  res.send(result);
+  try {
+    let data = new spareKitModel(req.body);
+    const result = await data.save();
+    return res.status(200).send({ result, message: "Added spare kit succesfully" });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ooopps, Failed to added spare kit data",
+    });
+  }
 };
 
 exports.deleteSpareKit = async (req, res, next) => {
-  console.log(req.params);
-  let data = await spareKitModel.deleteOne(req.params);
-
-  res.send(data);
+  try {
+    console.log(req.params);
+    return res.status(200).send({ message: "Deleted spare kit succesfully" });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ooopps, Failed to deleted spare kit data",
+    });
+  }
 };
 
 exports.editSpareKit = async (req, res, next) => {
-  console.log(req.params);
-  let data = await spareKitModel.updateOne(req.params, { $set: req.body });
-  res.send(data);
+  try {
+    console.log(req.params);
+    let data = await spareKitModel.updateOne(req.params, { $set: req.body });
+    return res.status(200).send({ message: "Updated spare kit succesfully" });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ooopps, Failed to updated spare kit data",
+    });
+  }
 };
 
 exports.getAll = (req, res, next) => {

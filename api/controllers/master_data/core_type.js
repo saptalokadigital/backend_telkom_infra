@@ -1,26 +1,80 @@
 const CoreType = require("../../models/core_type");
 require("dotenv").config();
 
-exports.postCoreType = async (req, res, next) => {
-    let data = new CoreType(req.body);
-    const result = await data.save();
-    res.send(result);
-};
+exports.postCoreType = (data) =>
+  new Promise((resolve, reject) => {
+    CoreType.create(data)
+      .then(() => {
+        resolve({
+          sukses: true,
+          msg: "Added core type succesfully",
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to added core type data",
+        });
+      });
+  });
 
-exports.getAllCoreType = async (req, res, next) => {
-    let data = await CoreType.find();
-    res.send(data);
-};
+exports.getAllCoreType = () =>
+  new Promise((resolve, reject) => {
+    CoreType.find({})
+      .then((res) => {
+        resolve({
+          sukses: true,
+          msg: "Get core type succesfully",
+          data: res,
+        });
+      })
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to get core type data",
+          data: [],
+        })
+      );
+  });
 
-exports.deleteCoreType = async (req, res, next) => {
-    console.log(req.params);
-    let data = await CoreType.deleteOne(req.params);
+exports.deleteCoreType = (id) =>
+  new Promise((resolve, reject) => {
+    CoreType.deleteOne({
+      _id: id,
+    })
+      .then(() =>
+        resolve({
+          sukses: true,
+          msg: "Deleted core type succesfully",
+        })
+      )
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to deleted core type data",
+        })
+      );
+  });
 
-    res.send(data);
-};
-
-exports.editCoreType = async (req, res, next) => {
-    console.log(req.params);
-    let data = await CoreType.updateOne(req.params, { $set: req.body });
-    res.send(data);
-};
+exports.editCoreType = (id, data) =>
+  new Promise((resolve, reject) => {
+    CoreType.updateOne(
+      {
+        _id: id,
+      },
+      data
+    )
+      .then(() =>
+        resolve({
+          sukses: true,
+          msg: "Edited core type succesfully",
+        })
+      )
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to edited core type data",
+        })
+      );
+  });
