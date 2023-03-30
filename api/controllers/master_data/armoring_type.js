@@ -46,7 +46,7 @@ exports.deleteArmoringType = (id) =>
       .then(() =>
         resolve({
           sukses: true,
-          msg: "Deleted cable type succesfully.",
+          msg: "Deleted cable type succesfully",
         })
       )
       .catch(() =>
