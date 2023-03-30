@@ -1,17 +1,24 @@
 const spareCableModel = require("../models/spare_cable.models");
 require("dotenv").config();
 
-exports.postSpareCable = async (req, res, next) => {
-  try {
-    let data = new spareCableModel(req.body);
-    const result = await data.save();
-    return res.status(200).send({ result, message: "Added spare cable succesfully" });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to added spare cable data",
-    });
-  }
-};
+exports.postSpareCable = (data) =>
+  new Promise((resolve, reject) => {
+    spareCableModel
+      .create(data)
+      .then(() => {
+        resolve({
+          sukses: true,
+          msg: "Added Spare Cable succesfully",
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to added Spare Cable data",
+        });
+      });
+  });
 
 exports.deleteSpareCable = async (req, res, next) => {
   try {

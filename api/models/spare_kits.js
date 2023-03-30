@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 const uniqueValidator = require("mongoose-unique-validator");
 const { Schema } = mongoose;
 
-const spareKitsSchema = new Schema({
+const spareKitsSchema = new Schema(
+  {
     no: {
-        type: Number,
+      type: Number,
     },
     location: { type: String, require: true },
     rak_number: { type: String, require: true },
@@ -21,19 +22,21 @@ const spareKitsSchema = new Schema({
     aktivitas_transaksi: { type: String, require: true },
     from_to: { type: String, require: true },
     nomor_berita_acara: { type: String, require: true },
-});
+  },
+  { versionKey: false }
+);
 
 spareKitsSchema.set("toJSON", {
-    transform: (document, returnedObject) => {
-        returnedObject.id = returnedObject._id.toString();
-        delete returnedObject._id;
-        delete returnedObject.__v;
-        delete returnedObject.password;
-    },
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
+    delete returnedObject.password;
+  },
 });
 
 spareKitsSchema.plugin(uniqueValidator, {
-    message: "Email/Username already in use.",
+  message: "Email/Username already in use.",
 });
 
 const spareKit = mongoose.model("spare_kit", spareKitsSchema);

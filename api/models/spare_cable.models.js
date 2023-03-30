@@ -2,15 +2,16 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const uniqueValidator = require("mongoose-unique-validator");
 
-const spareCableSchema = new Schema({
+const spareCableSchema = new Schema(
+  {
     no: {
-        type: Number,
+      type: Number,
     },
     depo_location: {
-        type: String,
+      type: String,
     },
     label_id: {
-        type: Number,
+      type: Number,
     },
     system: { type: mongoose.Schema.Types.ObjectId, ref: "System" },
     cable_type: { type: mongoose.Schema.Types.ObjectId, ref: "cable_type" },
@@ -18,68 +19,70 @@ const spareCableSchema = new Schema({
     manufacturer: { type: mongoose.Schema.Types.ObjectId, ref: "manufacturer" },
 
     armoring_type: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "armoring_type",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "armoring_type",
     },
 
     core_type: { type: mongoose.Schema.Types.ObjectId, ref: "core_type" },
-    
+
     length_report: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
     length_meas: {
-        type: Number,
+      type: Number,
     },
     doc_reff: {
-        type: Object,
+      type: Object,
     },
     tank: {
-        type: String,
+      type: String,
     },
     tank_location: {
-        type: String,
+      type: String,
     },
     tank_level: {
-        type: Number,
+      type: Number,
     },
     keterangan: {
-        type: String,
+      type: String,
     },
     evidence: {
-        type: String,
+      type: String,
     },
     sigma_core: {
-        type: Number,
+      type: Number,
     },
     tanggal_validasi: {
-        type: Date,
+      type: Date,
     },
     status_validasi: {
-        type: Date,
+      type: Date,
     },
     remark: {
-        type: String,
+      type: String,
     },
     last_update: {
-        type: Date,
+      type: Date,
     },
     E_core: {
-        type: Number,
+      type: Number,
     },
-});
+  },
+  { versionKey: false }
+);
 
 spareCableSchema.set("toJSON", {
-    transform: (document, returnedObject) => {
-        returnedObject.id = returnedObject._id.toString();
-        delete returnedObject._id;
-        delete returnedObject.__v;
-        delete returnedObject.password;
-    },
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
+    delete returnedObject.password;
+  },
 });
 
 spareCableSchema.plugin(uniqueValidator, {
-    message: "Email/Username already in use.",
+  message: "Email/Username already in use.",
 });
 
 const spareCableModel = mongoose.model("spare_cable", spareCableSchema);

@@ -1,43 +1,80 @@
 const ArmoringType = require("../../models/armoring_type");
 require("dotenv").config();
 
-exports.postArmoringType = async (req, res, next) => {
-  try {
-    let data = new ArmoringType(req.body);
-    const result = await data.save();
-    return res.status(200).send({ result, message: "Added armoring type succesfully" });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to added armoring type data",
-    });
-  }
-};
+exports.postArmoringType = (data) =>
+  new Promise((resolve, reject) => {
+    ArmoringType.create(data)
+      .then(() => {
+        resolve({
+          sukses: true,
+          msg: "Added ArmoringType succesfully",
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to added ArmoringType data",
+        });
+      });
+  });
 
-exports.getAllArmoringType = async (req, res, next) => {
-  let data = await ArmoringType.find();
-  res.send(data);
-};
+exports.getAllArmoringType = () =>
+  new Promise((resolve, reject) => {
+    ArmoringType.find({})
+      .then((res) => {
+        resolve({
+          sukses: true,
+          msg: "Get ArmoringType succesfully",
+          data: res,
+        });
+      })
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to get ArmoringType data",
+          data: [],
+        })
+      );
+  });
 
-exports.deleteArmoringType = async (req, res, next) => {
-  try {
-    console.log(req.params);
-    await ArmoringType.deleteOne(req.params);
-    return res.status(200).send({ message: "Deleted armoring type succesfully" });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to deleted armoring type data",
-    });
-  }
-};
+exports.deleteArmoringType = (id) =>
+  new Promise((resolve, reject) => {
+    ArmoringType.deleteOne({
+      _id: id,
+    })
+      .then(() =>
+        resolve({
+          sukses: true,
+          msg: "Deleted ArmoringType succesfully",
+        })
+      )
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to deleted ArmoringType data",
+        })
+      );
+  });
 
-exports.editArmoringType = async (req, res, next) => {
-  try {
-    console.log(req.params);
-    await ArmoringType.updateOne(req.params, { $set: req.body });
-    return res.status(200).send({ message: "Updated armoring type succesfully" });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to updated armoring type data",
-    });
-  }
-};
+exports.editArmoringType = (id, data) =>
+  new Promise((resolve, reject) => {
+    ArmoringType.updateOne(
+      {
+        _id: id,
+      },
+      data
+    )
+      .then(() =>
+        resolve({
+          sukses: true,
+          msg: "Edited ArmoringType succesfully",
+        })
+      )
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to edited ArmoringType data",
+        })
+      );
+  });

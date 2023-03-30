@@ -1,17 +1,24 @@
 const spareKitModel = require("../models/spare_kits");
 require("dotenv").config();
 
-exports.postSpareKit = async (req, res, next) => {
-  try {
-    let data = new spareKitModel(req.body);
-    const result = await data.save();
-    return res.status(200).send({ result, message: "Added spare kit succesfully" });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to added spare kit data",
-    });
-  }
-};
+exports.postSpareKit = (data) =>
+  new Promise((resolve, reject) => {
+    spareKitModel
+      .create(data)
+      .then(() => {
+        resolve({
+          sukses: true,
+          msg: "Added Spare Kit succesfully",
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to added Spare Kit data",
+        });
+      });
+  });
 
 exports.deleteSpareKit = async (req, res, next) => {
   try {
