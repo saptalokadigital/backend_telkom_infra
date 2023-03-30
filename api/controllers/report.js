@@ -62,7 +62,8 @@ exports.getReportPopulate = (req, res, next) => {
             {
                 $group: {
                     _id: {
-                        system: "$system._id",
+                        // system: "$system._id",
+                        sigma_core: "$sigma_core",
                         manufacturer: "$manufacturer._id",
                         core_type: "$core_type._id",
                         armoring_type: "$armoring_type._id",
@@ -70,6 +71,27 @@ exports.getReportPopulate = (req, res, next) => {
                     },
                     count: { $sum: 1 },
                     length_report: { $sum: "$length_report" },
+                    min_wd: { $first: "$armoring_type.min_wd" },
+                    max_wd: { $first: "$armoring_type.max_wd" },
+                },
+            },
+            {
+                $addFields: {
+                    min_spare_length: { $multiply: [5, "$max_wd", 3] },
+                },
+            },
+            {
+                $addFields: {
+                    deviasi: {
+                        $subtract: ["$length_report", "$min_spare_length"],
+                    },
+                },
+            },
+            {
+                $addFields: {
+                    checking: {
+                        $cond: [{ $gte: ["$deviasi", 0] }, true, false],
+                    },
                 },
             },
         ])
