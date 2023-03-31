@@ -32,7 +32,6 @@ exports.getTank = (req, res, next) => {
             {
                 $unwind: "$system",
             },
-
             {
                 $lookup: {
                     from: "cable_types",
