@@ -1,26 +1,80 @@
 const Perusahaan = require("../../models/perusahaan");
 require("dotenv").config();
 
-exports.postPerusahaan = async (req, res, next) => {
-  let data = new Perusahaan(req.body);
-  const result = await data.save();
-  res.send(result);
-};
+exports.postPerusahaan = (data) =>
+  new Promise((resolve, reject) => {
+    Perusahaan.create(data)
+      .then(() => {
+        resolve({
+          sukses: true,
+          msg: "Added Perusahaan succesfully",
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to added Perusahaan data",
+        });
+      });
+  });
 
-exports.getAllPerusahaan = async (req, res, next) => {
-  let data = await Perusahaan.find();
-  res.send(data);
-};
+exports.getAllPerusahaan = () =>
+  new Promise((resolve, reject) => {
+    Perusahaan.find({})
+      .then((res) => {
+        resolve({
+          sukses: true,
+          msg: "Get Perusahaan succesfully",
+          data: res,
+        });
+      })
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to get Perusahaan data",
+          data: [],
+        })
+      );
+  });
 
-exports.deletePerusahaan = async (req, res, next) => {
-  console.log(req.params);
-  let data = await Perusahaan.deleteOne(req.params);
+exports.deletePerusahaan = (id) =>
+  new Promise((resolve, reject) => {
+    Perusahaan.deleteOne({
+      _id: id,
+    })
+      .then(() =>
+        resolve({
+          sukses: true,
+          msg: "Deleted Perusahaan succesfully",
+        })
+      )
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to deleted Perusahaan data",
+        })
+      );
+  });
 
-  res.send(data);
-};
-
-exports.editPerusahaan = async (req, res, next) => {
-  console.log(req.params);
-  let data = await Perusahaan.updateOne(req.params, { $set: req.body });
-  res.send(data);
-};
+exports.editPerusahaan = (id, data) =>
+  new Promise((resolve, reject) => {
+    Perusahaan.updateOne(
+      {
+        _id: id,
+      },
+      data
+    )
+      .then(() =>
+        resolve({
+          sukses: true,
+          msg: "Edited Perusahaan succesfully",
+        })
+      )
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to edited Perusahaan data",
+        })
+      );
+  });

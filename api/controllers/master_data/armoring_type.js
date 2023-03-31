@@ -1,26 +1,80 @@
 const ArmoringType = require("../../models/armoring_type");
 require("dotenv").config();
 
-exports.postArmoringType = async (req, res, next) => {
-    let data = new ArmoringType(req.body);
-    const result = await data.save();
-    res.send(result);
-};
+exports.postArmoringType = (data) =>
+  new Promise((resolve, reject) => {
+    ArmoringType.create(data)
+      .then(() => {
+        resolve({
+          sukses: true,
+          msg: "Added cable type succesfully",
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to added cable type data",
+        });
+      });
+  });
 
-exports.getAllArmoringType = async (req, res, next) => {
-    let data = await ArmoringType.find();
-    res.send(data);
-};
+exports.getAllArmoringType = () =>
+  new Promise((resolve, reject) => {
+    ArmoringType.find({})
+      .then((res) => {
+        resolve({
+          sukses: true,
+          msg: "Get cable type succesfully",
+          data: res,
+        });
+      })
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to get cable type data",
+          data: [],
+        })
+      );
+  });
 
-exports.deleteArmoringType = async (req, res, next) => {
-    console.log(req.params);
-    let data = await ArmoringType.deleteOne(req.params);
+exports.deleteArmoringType = (id) =>
+  new Promise((resolve, reject) => {
+    ArmoringType.deleteOne({
+      _id: id,
+    })
+      .then(() =>
+        resolve({
+          sukses: true,
+          msg: "Deleted cable type succesfully",
+        })
+      )
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to deleted cable type data",
+        })
+      );
+  });
 
-    res.send(data);
-};
-
-exports.editArmoringType = async (req, res, next) => {
-    console.log(req.params);
-    let data = await ArmoringType.updateOne(req.params, { $set: req.body });
-    res.send(data);
-};
+exports.editArmoringType = (id, data) =>
+  new Promise((resolve, reject) => {
+    ArmoringType.updateOne(
+      {
+        _id: id,
+      },
+      data
+    )
+      .then(() =>
+        resolve({
+          sukses: true,
+          msg: "Edited cable type succesfully",
+        })
+      )
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to edited cable type data",
+        })
+      );
+  });

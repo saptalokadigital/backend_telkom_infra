@@ -1,26 +1,80 @@
 const System = require("../../models/system");
 require("dotenv").config();
 
-exports.postSystem = async (req, res, next) => {
-    let data = new System(req.body);
-    const result = await data.save();
-    res.send(result);
-};
+exports.postSystem = (data) =>
+  new Promise((resolve, reject) => {
+    System.create(data)
+      .then(() => {
+        resolve({
+          sukses: true,
+          msg: "Added System succesfully",
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to added system data",
+        });
+      });
+  });
 
-exports.getAllSystem = async (req, res, next) => {
-    let data = await System.find();
-    res.send(data);
-};
+exports.getAllSystem = () =>
+  new Promise((resolve, reject) => {
+    System.find({})
+      .then((res) => {
+        resolve({
+          sukses: true,
+          msg: "Get system succesfully",
+          data: res,
+        });
+      })
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to get system data",
+          data: [],
+        })
+      );
+  });
 
-exports.deleteSystem = async (req, res, next) => {
-    console.log(req.params);
-    let data = await System.deleteOne(req.params);
+exports.deleteSystem = (id) =>
+  new Promise((resolve, reject) => {
+    System.deleteOne({
+      _id: id,
+    })
+      .then(() =>
+        resolve({
+          sukses: true,
+          msg: "Deleted system succesfully",
+        })
+      )
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to deleted system data",
+        })
+      );
+  });
 
-    res.send(data);
-};
-
-exports.editSystem = async (req, res, next) => {
-    console.log(req.params);
-    let data = await System.updateOne(req.params, { $set: req.body });
-    res.send(data);
-};
+exports.editSystem = (id, data) =>
+  new Promise((resolve, reject) => {
+    System.updateOne(
+      {
+        _id: id,
+      },
+      data
+    )
+      .then(() =>
+        resolve({
+          sukses: true,
+          msg: "Edited system succesfully",
+        })
+      )
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to edited system data",
+        })
+      );
+  });

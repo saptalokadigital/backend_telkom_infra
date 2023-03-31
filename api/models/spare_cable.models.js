@@ -23,7 +23,7 @@ const spareCableSchema = new Schema({
     },
 
     core_type: { type: mongoose.Schema.Types.ObjectId, ref: "core_type" },
-
+    
     length_report: {
         type: Number,
         required: true,
