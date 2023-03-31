@@ -4,29 +4,34 @@ const ManufacturerController = require("../../controllers/master_data/manufactur
 const auth = require("../../middleware/auth");
 
 router.post("/create", (req, res) => {
-  ManufacturerController.postManufacturer(req.body)
-    .then((result) => res.json(result))
-    .catch((err) => res.json(err));
+    ManufacturerController.postManufacturer(req.body)
+        .then((result) => res.json(result))
+        .catch((err) => res.json(err));
 });
 
 router.get("/getall", (req, res) => {
-  ManufacturerController.getAllManufacturer()
-    .then((result) => res.json(result))
-    .catch((err) => res.json(err));
+    ManufacturerController.getAllManufacturer()
+        .then((result) => res.json(result))
+        .catch((err) => res.json(err));
 });
 
 router.delete("/delete/:id", (req, res) => {
-  ManufacturerController.deleteManufacturer(req.params.id)
-    .then((result) => res.json(result))
-    .catch((err) => res.json(err));
+    ManufacturerController.deleteManufacturer(req.params.id)
+        .then((result) => res.json(result))
+        .catch((err) => res.json(err));
 });
 
 router.put("/edit/:id", (req, res) => {
-  let data = req.body;
-  console.log(data);
-  ManufacturerController.editManufacturer(req.params.id, data)
-    .then((result) => res.json(result))
-    .catch((err) => res.json(err));
+    let data = req.body;
+    console.log(data);
+    ManufacturerController.editManufacturer(req.params.id, data)
+        .then((result) => res.json(result))
+        .catch((err) => res.json(err));
 });
 
+router.get("/get/:id", (req, res) => {
+    ManufacturerController.getManufacturer(req.params.id)
+        .then((result) => res.json(result))
+        .catch((err) => res.json(err));
+});
 module.exports = router;
