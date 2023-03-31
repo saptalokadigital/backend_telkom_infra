@@ -6,7 +6,7 @@ const perusahaanSchema = mongoose.Schema(
     address: { type: String, require: true },
     city: { type: String, require: true },
     state: { type: String, require: true },
-    phone: { type: Number, require: true },
+    phone: { type: String, require: true },
   },
   { versionKey: false }
 );
