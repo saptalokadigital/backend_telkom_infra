@@ -30,7 +30,7 @@ router.put("/edit/:id", (req, res) => {
 });
 
 router.get("/get/:id", (req, res) => {
-    UnitController.getUnit(req.params.id)
+    UnitController.getUnitById(req.params.id)
         .then((result) => res.json(result))
         .catch((err) => res.json(err));
 });

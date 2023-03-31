@@ -31,7 +31,7 @@ router.put("/edit/:id", (req, res) => {
 });
 
 router.get("/get/:id", (req, res) => {
-    SystemController.getSystem(req.params.id)
+    SystemController.getSystemById(req.params.id)
         .then((result) => res.json(result))
         .catch((err) => res.json(err));
 });
