@@ -7,14 +7,14 @@ exports.postArmoringType = (data) =>
       .then(() => {
         resolve({
           sukses: true,
-          msg: "Added ArmoringType succesfully",
+          msg: "Added cable type succesfully",
         });
       })
       .catch((e) => {
         console.log(e);
         reject({
           sukses: false,
-          msg: "Ooopps, Failed to added ArmoringType data",
+          msg: "Ooopps, Failed to added cable type data",
         });
       });
   });
@@ -25,14 +25,14 @@ exports.getAllArmoringType = () =>
       .then((res) => {
         resolve({
           sukses: true,
-          msg: "Get ArmoringType succesfully",
+          msg: "Get cable type succesfully",
           data: res,
         });
       })
       .catch(() =>
         reject({
           sukses: false,
-          msg: "Ooopps, Failed to get ArmoringType data",
+          msg: "Ooopps, Failed to get cable type data",
           data: [],
         })
       );
@@ -46,13 +46,13 @@ exports.deleteArmoringType = (id) =>
       .then(() =>
         resolve({
           sukses: true,
-          msg: "Deleted ArmoringType succesfully",
+          msg: "Deleted cable type succesfully",
         })
       )
       .catch(() =>
         reject({
           sukses: false,
-          msg: "Ooopps, Failed to deleted ArmoringType data",
+          msg: "Ooopps, Failed to deleted cable type data",
         })
       );
   });
@@ -68,13 +68,34 @@ exports.editArmoringType = (id, data) =>
       .then(() =>
         resolve({
           sukses: true,
-          msg: "Edited ArmoringType succesfully",
+          msg: "Edited cable type succesfully",
         })
       )
       .catch(() =>
         reject({
           sukses: false,
-          msg: "Ooopps, Failed to edited ArmoringType data",
+          msg: "Ooopps, Failed to edited cable type data",
+        })
+      );
+  });
+
+exports.getArmoringTypeById = (id) =>
+  new Promise((resolve, reject) => {
+    ArmoringType.findOne({
+      _id: id,
+    })
+      .then((res) => {
+        resolve({
+          sukses: true,
+          msg: "Get cable type succesfully",
+          data: res,
+        });
+      })
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to get cable type data",
+          data: [],
         })
       );
   });
