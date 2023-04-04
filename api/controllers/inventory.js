@@ -104,21 +104,14 @@ exports.getTank = (req, res, next) => {
         });
 };
 exports.getTankKits = (req, res, next) => {
-    // .find({
-    //     $or: [
-    //         {
-    //             tank_outer: `${req.params.tank}`,
-    //         },
-    //         {
-    //             tank_inner: `${req.params.tank}`,
-    //         },
-    //     ],
-    // })
     spareKitModel
         .aggregate([
             {
                 $match: {
-                    rak_number: `${req.params.tank}`,
+                    rak_number: {
+                        $regex: req.params.tank,
+                        $options: "i",
+                    },
                 },
             },
             {
