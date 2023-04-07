@@ -71,6 +71,9 @@ const submittedCableSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    length_taken: {
+        type: Number,
+    },
 });
 
 submittedCableSchema.set("toJSON", {
