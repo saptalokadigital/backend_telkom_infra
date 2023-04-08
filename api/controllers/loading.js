@@ -7,12 +7,19 @@ const spareKitModel = require("../models/spare_kits");
 require("dotenv").config();
 
 exports.addCableToLoading = async (req, res, next) => {
-  const { cables_id } = req.body;
+  const { cables_id, length } = req.body;
   if (cables_id > 0) {
     const isValidIds = comments.every((cables_id) => mongoose.Types.ObjectId.isValid(cables_id));
     if (!isValidIds) {
       return res.status(400).json({ error: "Invalid comment IDs" });
     }
+  }
+
+  //check length should be greater than 0
+  if (length <= 0) {
+    return res.status(400).json({
+      message: "Length should be greater than 0!",
+    });
   }
   try {
     // search for the loading document by id
@@ -25,7 +32,16 @@ exports.addCableToLoading = async (req, res, next) => {
         loading: loading,
       });
     }
-    loading.cables_id.push(cables_id);
+    // search for the cable document by id
+    const cable = await spareCableModel.findById(cables_id);
+
+    if (length < cable.length) {
+      return res.status(400).json({
+        message: `Cable length is less than required! Required length is ${cable.length}.`,
+        cable: cable,
+      });
+    }
+    loading.cables_id.push({ _id: cables_id, length_taken: length });
     // save loading in the database
     await loading.save();
     res.status(201).json({
@@ -400,8 +416,24 @@ exports.loadingSubmittion = async (req, res, next) => {
 
     await Promise.all(
       turnOver.flat().map(async (cable) => {
-        cable.tank_level = cable.tank_level - 1;
-        await cable.save();
+        //check the cable.tank_location
+        let toTank = cable.tank_location === "TANK-2" || cable.tank_location === "TANK-3" || cable.tank_location === "TANK-10" ? "TANK-6" : "TANK-1";
+        //check highest level in the toTank
+        const highestLevelInToTank = await spareCableModel.find({ tank_location: toTank, tank: cable.tank }).sort({ tank_level: -1 }).limit(1);
+        const highestLevelCable = highestLevelInToTank[0];
+        const highestLevel = highestLevelCable ? highestLevelCable.tank_level : 0;
+        const newLevel = highestLevel + 1;
+        //update cable tank and tank_location
+        await spareCableModel.updateOne(
+          { _id: cable._id },
+          {
+            $set: {
+              tank_location: toTank,
+              tank_level: newLevel,
+            },
+          }
+        );
+        return res.send(cable);
       })
     );
 
@@ -410,12 +442,28 @@ exports.loadingSubmittion = async (req, res, next) => {
       cables.map(async (cable) => {
         const cableObj = cable.toObject();
         delete cableObj._id;
+        const cableLength = cable.length_report;
+        const lengthTaken = loading.cables_id.find((c) => c._id.toString() === cable._id.toString()).length_taken;
+        cableObj.length_taken = lengthTaken;
         // create new submitted cable
         const submittedCable = new submittedCableModel(cableObj);
         // save submitted cable in the database
         await submittedCable.save();
         // delete cable from spare cable
-        await spareCableModel.findByIdAndDelete(cable._id);
+        if (lengthTaken < cableLength) {
+          // subtract length_taken from cable length
+          cable.length = cableLength - lengthTaken;
+          // update cable length in the database
+          await spareCableModel.findByIdAndUpdate(cable._id, {
+            length_report: cable.length,
+          });
+        } else if (lengthTaken === cableLength) {
+          // delete cable from spare cable
+          await spareCableModel.findByIdAndDelete(cable._id);
+        } else {
+          // return error message
+          return res.status(400).json({ error: "Invalid length taken" });
+        }
         // add submitted cable to submitted_cables
         loading.submitted_cables.push(submittedCable);
       })
