@@ -1,24 +1,20 @@
 const spareCableModel = require("../models/spare_cable.models");
 require("dotenv").config();
 
-exports.postSpareCable = (data) =>
-  new Promise((resolve, reject) => {
-    spareCableModel
-      .create(data)
-      .then(() => {
-        resolve({
-          sukses: true,
-          msg: "Added Spare Cable succesfully",
-        });
-      })
-      .catch((e) => {
-        console.log(e);
-        reject({
-          sukses: false,
-          msg: "Ooopps, Failed to added Spare Cable data",
-        });
-      });
-  });
+// exports.postSpareCable = async (req, res, next) => {
+//     try {
+//         let data = new spareCableModel(req.body);
+//         return res.send(data);
+//         const result = await data.save();
+//         return res
+//             .status(200)
+//             .send({ result, message: "Added spare cable succesfully" });
+//     } catch (error) {
+//         return res.status(500).send({
+//             message: "Ooopps, Failed to added spare cable data",
+//         });
+//     }
+// };
 
 exports.deleteSpareCable = async (req, res, next) => {
   try {
@@ -141,36 +137,18 @@ exports.getCablePopulate = (req, res, next) => {
 };
 
 exports.createSpareCable = async (req, res, next) => {
-  const tank_inner = req.body.tank_inner;
-  const tank_outer = req.body.tank_outer;
+  const tank = req.body.tank;
+  const tank_location = req.body.tank_location;
+
   let highest_tank = 0;
-  // should only one of them be filled
-  if (tank_inner && tank_outer) {
-    res.status(400).send("Only one of tank_inner or tank_outer should be filled");
-    return;
-  }
-  // should be one of them filled
-  if (!tank_inner && !tank_outer) {
-    res.status(400).send("One of tank_inner or tank_outer should be filled");
-    return;
-  }
-  //check if tank_inner or tank_outer is filled
-  //if tank_inner is filled
-  //find the highest tank_inner
-  if (tank_inner) {
-    const highest_tank_inner = await spareCableModel.find({ tank_inner: tank_inner }).sort({ tank_level: -1 }).limit(1);
-    if (highest_tank_inner.length > 0) {
-      highest_tank = highest_tank_inner[0].tank_level;
+
+  if (tank && tank_location) {
+    const highest_tank_cable = await spareCableModel.find({ tank: tank, tank_location: tank_location }).sort({ tank_level: -1 }).limit(1);
+    if (highest_tank_cable.length > 0) {
+      highest_tank = highest_tank_cable[0].tank_level;
     }
   }
-  //if tank_outer is filled
-  //find the highest tank_outer
-  if (tank_outer) {
-    const highest_tank_outer = await spareCableModel.find({ tank_outer: tank_outer }).sort({ tank_level: -1 }).limit(1);
-    if (highest_tank_outer.length > 0) {
-      highest_tank = highest_tank_outer[0].tank_level;
-    }
-  }
+
   let data = new spareCableModel({
     ...req.body,
     tank_level: highest_tank + 1,
