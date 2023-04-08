@@ -27,7 +27,6 @@ const spareCableSchema = new Schema(
 
     length_report: {
       type: Number,
-      required: true,
     },
     length_meas: {
       type: Number,

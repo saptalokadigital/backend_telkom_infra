@@ -7,14 +7,14 @@ exports.postArmoringType = (data) =>
       .then(() => {
         resolve({
           sukses: true,
-          msg: "Added cable type succesfully",
+          msg: "Added armoring type succesfully",
         });
       })
       .catch((e) => {
         console.log(e);
         reject({
           sukses: false,
-          msg: "Ooopps, Failed to added cable type data",
+          msg: "Ooopps, Failed to added armoring type data",
         });
       });
   });
@@ -25,14 +25,14 @@ exports.getAllArmoringType = () =>
       .then((res) => {
         resolve({
           sukses: true,
-          msg: "Get cable type succesfully",
+          msg: "Get armoring type succesfully",
           data: res,
         });
       })
       .catch(() =>
         reject({
           sukses: false,
-          msg: "Ooopps, Failed to get cable type data",
+          msg: "Ooopps, Failed to get armoring type data",
           data: [],
         })
       );
@@ -46,13 +46,13 @@ exports.deleteArmoringType = (id) =>
       .then(() =>
         resolve({
           sukses: true,
-          msg: "Deleted cable type succesfully",
+          msg: "Deleted armoring type succesfully",
         })
       )
       .catch(() =>
         reject({
           sukses: false,
-          msg: "Ooopps, Failed to deleted cable type data",
+          msg: "Ooopps, Failed to deleted armoring type data",
         })
       );
   });
@@ -68,13 +68,13 @@ exports.editArmoringType = (id, data) =>
       .then(() =>
         resolve({
           sukses: true,
-          msg: "Edited cable type succesfully",
+          msg: "Edited armoring type succesfully",
         })
       )
       .catch(() =>
         reject({
           sukses: false,
-          msg: "Ooopps, Failed to edited cable type data",
+          msg: "Ooopps, Failed to edited armoring type data",
         })
       );
   });
@@ -87,14 +87,14 @@ exports.getArmoringTypeById = (id) =>
       .then((res) => {
         resolve({
           sukses: true,
-          msg: "Get cable type succesfully",
+          msg: "Get armoring type succesfully",
           data: res,
         });
       })
       .catch(() =>
         reject({
           sukses: false,
-          msg: "Ooopps, Failed to get cable type data",
+          msg: "Ooopps, Failed to get armoring type data",
           data: [],
         })
       );

@@ -148,13 +148,19 @@ exports.createSpareCable = async (req, res, next) => {
       highest_tank = highest_tank_cable[0].tank_level;
     }
   }
-
-  let data = new spareCableModel({
-    ...req.body,
-    tank_level: highest_tank + 1,
-  });
-  const result = await data.save();
-  res.send(result);
+  try {
+    let data = new spareCableModel({
+      ...req.body,
+      tank_level: highest_tank + 1,
+    });
+    const result = await data.save();
+    return res.status(200).send({ result, msg: "Added spare cable succesfully", sukses: true });
+  } catch (error) {
+    return res.status(500).send({
+      msg: "Ooopps, Failed to added spare cable data",
+      sukses: false,
+    });
+  }
 };
 
 exports.moveSpareCable = async (req, res, next) => {
