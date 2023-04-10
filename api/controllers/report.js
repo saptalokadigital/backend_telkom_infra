@@ -68,6 +68,7 @@ exports.getReportPopulate = (req, res, next) => {
                         core_type: "$core_type._id",
                         armoring_type: "$armoring_type._id",
                         cable_type: "$cable_type._id",
+                        tank: "$tank",
                     },
                     count: { $sum: 1 },
                     length_report: { $sum: "$length_report" },
@@ -165,6 +166,7 @@ exports.getReportPopulate = (req, res, next) => {
                     min_spare_length: 1,
                     deviasi: 1,
                     checking: 1,
+                    tank: "$_id.tank",
                 },
             },
         ])
