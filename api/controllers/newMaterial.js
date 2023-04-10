@@ -168,60 +168,78 @@ exports.submitCartCablesNewMaterial = async (req, res, next) => {
         const authHeader = req.headers["authorization"];
         const token = authHeader && authHeader.split(" ")[1];
 
-        // create new loading new material
-        let loadingNewMaterial = new loadingNewMaterial({
-            _id: new mongoose.Types.ObjectId(),
+        if (!token) {
+            return res
+                .status(401)
+                .send({ auth: false, message: "No token provided." });
+        }
+        let newLoadingMaterial = new loadingNewMaterial({
             date: req.body.date,
 
             // add user id
             user: req.body.user,
         });
-
-        if (!token)
-            return res
-                .status(401)
-                .send({ auth: false, message: "No token provided." });
         jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
-            if (err)
+            if (err) {
                 return res.status(500).send({
                     auth: false,
                     message: "Failed to authenticate token inside.",
                 });
+            }
+
             const user = await User.findById(decoded.userId);
+
             const cartCables = await cableNewMaterial.find({
                 _id: { $in: user.cartCableNewMaterial },
             });
-            // return res.status(200).send(cartCables);
-            // loop through cartCables and save them to spareCable
-            await Promise.all(
-                cartCables.map(async (cable) => {
-                    const cableObj = cable.toObject();
-                    delete cableObj._id;
-                    const tank = cableObj.tank;
-                    const tank_location = cableObj.tank_location;
-                    let highest_tank = 0;
-                    if (tank && tank_location) {
-                        const highest_tank_cable = await spareCableModel
-                            .find({ tank: tank, tank_location: tank_location })
-                            .sort({ tank_level: -1 })
-                            .limit(1);
-                        if (highest_tank_cable.length > 0) {
-                            highest_tank = highest_tank_cable[0].tank_level;
-                        }
+
+            let tankLevelMap = new Map();
+            let nextTankLevels = new Map();
+
+            for (const cable of cartCables) {
+                const cableObj = cable.toObject();
+                delete cableObj._id;
+
+                const tank = cableObj.tank;
+                const tank_location = cableObj.tank_location;
+
+                let highest_tank = 0;
+                if (tank && tank_location) {
+                    const highest_tank_cable = await spareCableModel
+                        .find({ tank: tank, tank_location: tank_location })
+                        .sort({ tank_level: -1 })
+                        .limit(1);
+
+                    if (highest_tank_cable.length > 0) {
+                        highest_tank = highest_tank_cable[0].tank_level;
                     }
-                    cableObj.tank_level = highest_tank + 1;
-                    const spareCable = new spareCableModel(cableObj);
-                    await spareCable.save();
-                    loadingNewMaterial.cables_id.push(spareCable._id);
-                    loadingNewMaterial.submitted_new_material.push(cable._id);
-                })
-            );
-            await loadingNewMaterial.save();
+
+                    if (tankLevelMap.has(tank_location)) {
+                        nextTankLevels.set(
+                            tank_location,
+                            tankLevelMap.get(tank_location) + 1
+                        );
+                    } else {
+                        nextTankLevels.set(tank_location, highest_tank + 1);
+                    }
+                    tankLevelMap.set(
+                        tank_location,
+                        nextTankLevels.get(tank_location)
+                    );
+                }
+
+                cableObj.tank_level = nextTankLevels.get(tank_location);
+                const spareCable = new spareCableModel(cableObj);
+                await spareCable.save();
+                newLoadingMaterial.cables_id.push(spareCable._id);
+                newLoadingMaterial.submitted_new_material.push(cable._id);
+            }
+
+            await newLoadingMaterial.save();
             user.cartCableNewMaterial = [];
             await user.save();
-            return res.status(200).send({
-                message: "Cart submitted.",
-            });
+
+            return res.status(200).send({ message: "Cart submitted." });
         });
     } catch (error) {
         return res.status(500).send({

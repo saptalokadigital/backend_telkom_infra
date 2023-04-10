@@ -18,7 +18,10 @@ exports.getTank = (req, res, next) => {
         .aggregate([
             {
                 $match: {
-                    tank_location: `${req.params.tank}`,
+                    tank_location: {
+                        $regex: req.params.tank,
+                        $options: "i",
+                    },
                 },
             },
             {
