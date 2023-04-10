@@ -70,27 +70,34 @@ exports.getPage = (req, res, next) => {
     });
 };
 
-exports.getKitPopulate = (req, res, next) => {
-  spareKitModel
-    .aggregate([
-      {
-        $lookup: {
-          from: "systems",
-          localField: "system",
-          foreignField: "_id",
-          as: "system",
+exports.getKitPopulate = () =>
+  new Promise((resolve, reject) => {
+    spareKitModel
+      .aggregate([
+        {
+          $lookup: {
+            from: "systems",
+            localField: "system",
+            foreignField: "_id",
+            as: "system",
+          },
         },
-      },
-      {
-        $unwind: "$system",
-      },
-    ])
-    .exec(function (err, kits) {
-      if (err) {
-        res.send("error has occured");
-      } else {
-        console.log(kits);
-        res.json(kits);
-      }
-    });
-};
+        {
+          $unwind: "$system",
+        },
+      ])
+      .then((res) => {
+        resolve({
+          sukses: true,
+          msg: "Get spare kit succesfully",
+          data: res,
+        });
+      })
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to get spare kit data",
+          data: [],
+        })
+      );
+  });

@@ -40,16 +40,25 @@ exports.editSpareCable = async (req, res, next) => {
   }
 };
 
-exports.getAll = (req, res, next) => {
-  spareCableModel.find({}).exec(function (err, cables) {
-    if (err) {
-      res.send("error has occured");
-    } else {
-      console.log(cables);
-      res.json(cables);
-    }
+exports.getAll = () =>
+  new Promise((resolve, reject) => {
+    spareCableModel
+      .find({})
+      .then((res) => {
+        resolve({
+          sukses: true,
+          msg: "Get Spare Cable succesfully",
+          data: res,
+        });
+      })
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to get Spare Cable data",
+          data: [],
+        })
+      );
   });
-};
 
 exports.getPage = (req, res, next) => {
   const page = parseInt(req.params.page, 10);
@@ -67,74 +76,81 @@ exports.getPage = (req, res, next) => {
     });
 };
 
-exports.getCablePopulate = (req, res, next) => {
-  spareCableModel
-    .aggregate([
-      {
-        $lookup: {
-          from: "systems",
-          localField: "system",
-          foreignField: "_id",
-          as: "system",
+exports.getCablePopulate = () =>
+  new Promise((resolve, reject) => {
+    spareCableModel
+      .aggregate([
+        {
+          $lookup: {
+            from: "systems",
+            localField: "system",
+            foreignField: "_id",
+            as: "system",
+          },
         },
-      },
-      {
-        $unwind: "$system",
-      },
-      {
-        $lookup: {
-          from: "cable_types",
-          localField: "cable_type",
-          foreignField: "_id",
-          as: "cable_type",
+        {
+          $unwind: "$system",
         },
-      },
-      {
-        $unwind: "$cable_type",
-      },
-      {
-        $lookup: {
-          from: "armoring_types",
-          localField: "armoring_type",
-          foreignField: "_id",
-          as: "armoring_type",
+        {
+          $lookup: {
+            from: "cable_types",
+            localField: "cable_type",
+            foreignField: "_id",
+            as: "cable_type",
+          },
         },
-      },
-      {
-        $unwind: "$armoring_type",
-      },
-      {
-        $lookup: {
-          from: "core_types",
-          localField: "core_type",
-          foreignField: "_id",
-          as: "core_type",
+        {
+          $unwind: "$cable_type",
         },
-      },
-      {
-        $unwind: "$core_type",
-      },
-      {
-        $lookup: {
-          from: "manufacturers",
-          localField: "manufacturer",
-          foreignField: "_id",
-          as: "manufacturer",
+        {
+          $lookup: {
+            from: "armoring_types",
+            localField: "armoring_type",
+            foreignField: "_id",
+            as: "armoring_type",
+          },
         },
-      },
-      {
-        $unwind: "$manufacturer",
-      },
-    ])
-    .exec(function (err, cables) {
-      if (err) {
-        res.send("error has occured");
-      } else {
-        console.log(cables);
-        res.json(cables);
-      }
-    });
-};
+        {
+          $unwind: "$armoring_type",
+        },
+        {
+          $lookup: {
+            from: "core_types",
+            localField: "core_type",
+            foreignField: "_id",
+            as: "core_type",
+          },
+        },
+        {
+          $unwind: "$core_type",
+        },
+        {
+          $lookup: {
+            from: "manufacturers",
+            localField: "manufacturer",
+            foreignField: "_id",
+            as: "manufacturer",
+          },
+        },
+        {
+          $unwind: "$manufacturer",
+        },
+      ])
+      .then((res) => {
+        resolve({
+          sukses: true,
+          msg: "Get spare cable succesfully",
+          data: res,
+        });
+      })
+      .catch(() =>
+        reject({
+          sukses: false,
+          msg: "Ooopps, Failed to get spare cable data",
+          data: [],
+        })
+      );
+  });
 
 exports.createSpareCable = async (req, res, next) => {
   const tank = req.body.tank;
