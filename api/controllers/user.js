@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const dashCableModel = require("../models/spare_cable.models");
 require("dotenv").config();
 
-// Create new user or Sign up
+// Create new user or Sign ups
 exports.signUpNewUser = (req, res, next) => {
   User.find({
     $or: [{ email: req.body.email }, { username: req.body.username }],
