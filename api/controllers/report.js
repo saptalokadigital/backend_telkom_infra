@@ -1,4 +1,5 @@
 const spareCableModel = require("../models/spare_cable.models");
+const spareKitsSchema = require("../models/spare_kits");
 require("dotenv").config();
 
 exports.getReportPopulate = (req, res, next) => {
@@ -168,6 +169,56 @@ exports.getReportPopulate = (req, res, next) => {
                     checking: 1,
                     tank: "$_id.tank",
                 },
+            },
+        ])
+        .exec(function (err, cables) {
+            if (err) {
+                res.send("error has occured");
+            } else {
+                console.log(cables);
+                res.json(cables);
+            }
+        });
+};
+
+exports.getReportKitsPopulate = (req, res, next) => {
+    spareKitsSchema
+        .aggregate([
+            {
+                $lookup: {
+                    from: "systems",
+                    localField: "system",
+                    foreignField: "_id",
+                    as: "system",
+                },
+            },
+            {
+                $unwind: "$system",
+            },
+            {
+                $group: {
+                    _id: {
+                        system: "$system._id",
+                        part_number: "$part_number",
+                    },
+                    qty: { $sum: 1 },
+                    location: { $first: "$location" },
+                    item_name: { $first: "$item_name" },
+                    serial_number: { $first: "$serial_number" },
+                    weight: { $first: "$weight" },
+                    unit: { $first: "$unit" },
+                },
+            },
+            {
+                $lookup: {
+                    from: "systems",
+                    localField: "_id.system",
+                    foreignField: "_id",
+                    as: "system",
+                },
+            },
+            {
+                $unwind: "$system",
             },
         ])
         .exec(function (err, cables) {
