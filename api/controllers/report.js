@@ -207,6 +207,7 @@ exports.getReportKitsPopulate = (req, res, next) => {
                     serial_number: { $first: "$serial_number" },
                     weight: { $first: "$weight" },
                     unit: { $first: "$unit" },
+                    rak_number: { $first: "$rak_number" },
                 },
             },
             {
@@ -219,6 +220,20 @@ exports.getReportKitsPopulate = (req, res, next) => {
             },
             {
                 $unwind: "$system",
+            },
+            {
+                $project: {
+                    _id: 0,
+                    system: "$system.system",
+                    part_number: "$_id.part_number",
+                    qty: 1,
+                    location: 1,
+                    item_name: 1,
+                    serial_number: 1,
+                    weight: 1,
+                    unit: 1,
+                    rak_number: 1,
+                },
             },
         ])
         .exec(function (err, cables) {
