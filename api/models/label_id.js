@@ -1,12 +1,7 @@
 const mongoose = require("mongoose");
 
-const loadingSchema = mongoose.Schema({
-    cables_id: [
-        {
-            id: { type: mongoose.Schema.Types.ObjectId, ref: "spare_cable" },
-            length_taken: { type: Number, required: true },
-        },
-    ],
+const labelIdSchema = mongoose.Schema({
+    cables_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "spare_cable" }],
     kits_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "spare_kit" }],
     cables_turnover_id: [
         { type: mongoose.Schema.Types.ObjectId, ref: "spare_cable" },
@@ -30,4 +25,4 @@ const loadingSchema = mongoose.Schema({
     diketahui: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     perusahaan: { type: mongoose.Schema.Types.ObjectId, ref: "perusahaan" },
 });
-module.exports = mongoose.model("loading", loadingSchema);
+module.exports = mongoose.model("label_id", labelIdSchema);
