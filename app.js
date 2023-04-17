@@ -29,19 +29,20 @@ const updatingSpareCableRoutes = require("./api/routes/updateSpareCable");
 const offloadingRoutes = require("./api/routes/offloading");
 const reportRoutes = require("./api/routes/report");
 const spareCableNewMaterialRoutes = require("./api/routes/newMaterial");
+const dashboardRoutes = require("./api/routes/dashboard");
 
 mongoose
-    .connect(mongoUrl, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
-    .then(() => {
-        console.log("Berhasil Connect Ke Database");
-    })
-    .catch((e) => {
-        console.log(e);
-        console.log("Gagal Connect Ke Database");
-    });
+  .connect(mongoUrl, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Berhasil Connect Ke Database");
+  })
+  .catch((e) => {
+    console.log(e);
+    console.log("Gagal Connect Ke Database");
+  });
 
 app.use(express.json());
 
@@ -84,14 +85,14 @@ app.use(express.json());
 
 // get all spare cables
 app.get("/all-spareCables", (req, res) => {
-    spareCable
-        .find()
-        .then((result) => {
-            res.send(result);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
+  spareCable
+    .find()
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 });
 
 // add spare kits
@@ -125,14 +126,14 @@ app.get("/all-spareCables", (req, res) => {
 
 // get all spare kit
 app.get("/all-spareKits", (req, res) => {
-    spareKit
-        .find()
-        .then((result) => {
-            res.send(result);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
+  spareKit
+    .find()
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 });
 
 app.use(morgan("dev"));
@@ -140,20 +141,17 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accep, Authorization"
-    );
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accep, Authorization"
+  );
 
-    if (req.method === "OPTIONS") {
-        res.header(
-            "Access-Control-Allow-Method",
-            "PUT, POST, PATCH, DELETE, GET"
-        );
-        return res.status(200).json({});
-    }
-    next();
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Method", "PUT, POST, PATCH, DELETE, GET");
+    return res.status(200).json({});
+  }
+  next();
 });
 
 app.use("/api/user", userRoutes);
@@ -177,20 +175,21 @@ app.use("/api/loading", loadingRoutes);
 app.use("/api/offloading", offloadingRoutes);
 app.use("/api/report", reportRoutes);
 app.use("/api/spareCableNewMaterial", spareCableNewMaterialRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.use((req, res, next) => {
-    const error = new Error("Not found");
-    error.status = 400;
-    next(error);
+  const error = new Error("Not found");
+  error.status = 400;
+  next(error);
 });
 
 app.use((error, req, res, next) => {
-    res.status(error.status || 500);
-    res.json({
-        error: {
-            message: error.message,
-        },
-    });
+  res.status(error.status || 500);
+  res.json({
+    error: {
+      message: error.message,
+    },
+  });
 });
 
 module.exports = app;
