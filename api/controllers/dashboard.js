@@ -121,6 +121,14 @@ exports.getChartByCableType = async (req, res, next) => {
   // Get all cable types
   const cableTypes = await CableType.find().exec();
 
+  const newCableTypeFields = []; // Define newCableTypeFields here
+
+  cableTypes.forEach((cableType, index) => {
+    const nomor = `${index + 1}`;
+    const newField = { cable_type: cableType, armoring_types: [], nomor };
+    newCableTypeFields.push(newField);
+  });
+
   // Get all armoring types
   const armoringTypes = await ArmoringType.find().exec();
 
@@ -174,6 +182,7 @@ exports.getChartByCableType = async (req, res, next) => {
     {
       $project: {
         _id: 0,
+        nomor: { $sum: 1 },
         cable_type: "$_id",
         armoring_types: 1,
       },
@@ -191,7 +200,7 @@ exports.getChartByCableType = async (req, res, next) => {
       res.send("error has occurred");
     } else {
       // Modify the result to include all armoring types for each cable type
-      const modifiedCables = cableTypes.map((cableType) => {
+      const modifiedCables = cableTypes.map((cableType, index) => {
         const armoringTypesForCableType = armoringTypes.map((armoringType) => {
           const foundArmoringType = cables.find(
             (cable) =>
@@ -214,6 +223,7 @@ exports.getChartByCableType = async (req, res, next) => {
         });
 
         return {
+          nomor: `${index + 1}`,
           cable_type: cableType.cable_type,
           armoring_types: armoringTypesForCableType,
         };
