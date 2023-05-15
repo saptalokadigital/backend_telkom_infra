@@ -1,12 +1,7 @@
 const mongoose = require("mongoose");
 
 const loadingSchema = mongoose.Schema({
-  cables_id: [
-    {
-      id: { type: mongoose.Schema.Types.ObjectId, ref: "spare_cable" },
-      length_taken: { type: Number, required: true },
-    },
-  ],
+  cables_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "spare_cable" }],
   kits_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "spare_kit" }],
   cables_turnover_id: [
     { type: mongoose.Schema.Types.ObjectId, ref: "spare_cable" },
