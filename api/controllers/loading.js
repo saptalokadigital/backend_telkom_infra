@@ -397,6 +397,7 @@ exports.loadingSubmittion = async (req, res, next) => {
       turnOver.flat().map(async (cable) => {
         //check the cable.tank_location
         let toTank =
+          cable.tank_location === "TANK-1" ||
           cable.tank_location === "TANK-2" ||
           cable.tank_location === "TANK-3" ||
           cable.tank_location === "TANK-10"
