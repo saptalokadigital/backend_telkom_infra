@@ -254,7 +254,7 @@ exports.getLoadingById = async (req, res, next) => {
 exports.postLoading = async (req, res, next) => {
   let data = new loadingModel(req.body);
   const result = await data.save();
-  res.send(result);
+  res.status(201).json({ success: true, id: result._id, loading: result });
 };
 
 //get all loading
