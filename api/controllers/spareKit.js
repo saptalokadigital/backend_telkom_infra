@@ -84,6 +84,26 @@ exports.getKitPopulate = (req, res, next) => {
       {
         $unwind: "$system",
       },
+      {
+        $project: {
+          _id: 1,
+          system: "$system.system",
+          no: 1,
+          location: 1,
+          rak_number: 1,
+          item_name: 1,
+          part_number: 1,
+          serial_number: 1,
+          weight: 1,
+          qty: 1,
+          unit: 1,
+          keterangan: 1,
+          tanggal_transaksi: 1,
+          aktivitas_transaksi: 1,
+          from_to: 1,
+          nomor_berita_acara: 1,
+        },
+      },
     ])
     .exec(function (err, kits) {
       if (err) {
