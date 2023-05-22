@@ -5,6 +5,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const mongoUrl = "mongodb://127.0.0.1:27017/telkominfra";
+const cors = require("cors");
 
 const userRoutes = require("./api/routes/user");
 const spareCable = require("./api/models/spare_cable.models");
@@ -43,6 +44,8 @@ mongoose
     console.log(e);
     console.log("Gagal Connect Ke Database");
   });
+
+app.use(cors());
 
 app.use(express.json());
 
@@ -139,20 +142,6 @@ app.get("/all-spareKits", (req, res) => {
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accep, Authorization"
-  );
-
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Method", "PUT, POST, PATCH, DELETE, GET");
-    return res.status(200).json({});
-  }
-  next();
-});
 
 app.use("/api/user", userRoutes);
 app.use("/api/spareCable", spareCableRoutes);
