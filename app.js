@@ -31,6 +31,7 @@ const offloadingRoutes = require("./api/routes/offloading");
 const reportRoutes = require("./api/routes/report");
 const spareCableNewMaterialRoutes = require("./api/routes/newMaterial");
 const dashboardRoutes = require("./api/routes/dashboard");
+const kursRouter = require("./api/routes/master_data/kurs");
 
 mongoose
   .connect(mongoUrl, {
@@ -165,6 +166,7 @@ app.use("/api/offloading", offloadingRoutes);
 app.use("/api/report", reportRoutes);
 app.use("/api/spareCableNewMaterial", spareCableNewMaterialRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/kurs", kursRouter);
 
 app.use((req, res, next) => {
   const error = new Error("Not found");
