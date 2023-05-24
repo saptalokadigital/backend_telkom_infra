@@ -254,11 +254,11 @@ exports.getLoadingById = async (req, res, next) => {
     // find the loading document by id and populate the array cables_id field
     const loading = await loadingModel
       .findById(loadingId)
-      .populate("cables_id");
+      .populate("cables_id._id");
 
     res.status(200).json({
       message: "Loading fetched successfully!",
-      loading: loading,
+      loading: [loading],
     });
   } catch (error) {
     console.error(error);
