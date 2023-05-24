@@ -23,7 +23,11 @@ exports.addCableToLoading = async (req, res, next) => {
     const loading = await loadingModel.findById(req.params.loadingId);
     // add the new cable id to the array
     // check if the cable id is already in the array
-    if (loading.cables_id.includes(cables_id)) {
+    if (
+      loading.cables_id.some(
+        (cable) => cable._id.toString() === cables_id.toString()
+      )
+    ) {
       return res.status(400).json({
         message: "Cable already added to the loading!",
         loading: loading,
@@ -119,11 +123,16 @@ exports.removeCableFromLoading = async (req, res, next) => {
     const loading = await loadingModel.findById(req.params.loadingId);
     // remove the cable id from the array
     // check if the cable id is already in the array
-    if (!loading.cables_id.includes(cables_id)) {
+    if (
+      !loading.cables_id.some(
+        (cable) => cable._id.toString() === cables_id.toString()
+      )
+    ) {
       return res.status(400).json({
         message: "Cable is not in the loading!",
       });
     }
+
     loading.cables_id.pull(cables_id);
     // save loading in the database
     await loading.save();
@@ -154,11 +163,16 @@ exports.addKitToLoading = async (req, res, next) => {
     const loading = await loadingModel.findById(req.params.loadingId);
     // add the new kit id to the array
     // check if the kit id is already in the array
-    if (loading.kits_id.includes(kits_id)) {
+
+    if (
+      loading.kits_id.some((kit) => kit._id.toString() === kits_id.toString())
+    ) {
       return res.status(400).json({
-        message: "Kit already added to the loading!",
+        message: "Kits already added to the loading!",
+        loading: loading,
       });
     }
+
     loading.kits_id.push(kits_id);
     // save loading in the database
     await loading.save();
@@ -190,9 +204,12 @@ exports.removeKitFromLoading = async (req, res, next) => {
     const loading = await loadingModel.findById(req.params.loadingId);
     // remove the kit id from the array
     // check if the kit id is not in the array
-    if (!loading.kits_id.includes(kits_id)) {
+
+    if (
+      !loading.kits_id.some((kit) => kit._id.toString() === kits_id.toString())
+    ) {
       return res.status(400).json({
-        message: "Kit is not in the loading!",
+        message: "Kits is not in the loading!",
       });
     }
     loading.kits_id.pull(kits_id);
