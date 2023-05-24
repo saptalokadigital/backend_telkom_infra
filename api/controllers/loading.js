@@ -8,7 +8,7 @@ const fs = require("fs");
 require("dotenv").config();
 
 exports.addCableToLoading = async (req, res, next) => {
-  const { cables_id } = req.body;
+  const { cables_id, priceIdr, priceUsd } = req.body;
   if (cables_id > 0) {
     const isValidIds = comments.every((cables_id) =>
       mongoose.Types.ObjectId.isValid(cables_id)
@@ -32,7 +32,7 @@ exports.addCableToLoading = async (req, res, next) => {
     // search for the cable document by id
     const cable = await spareCableModel.findById(cables_id);
 
-    loading.cables_id.push({ _id: cables_id });
+    loading.cables_id.push({ _id: cables_id, priceIdr, priceUsd });
     // save loading in the database
     await loading.save();
     res.status(201).json({
@@ -395,35 +395,15 @@ exports.loadingSubmittion = async (req, res, next) => {
 
     await Promise.all(
       turnOver.flat().map(async (cable) => {
-        //check the cable.tank_location
-        let toTank =
-          cable.tank_location === "TANK-1" ||
-          cable.tank_location === "TANK-2" ||
-          cable.tank_location === "TANK-3" ||
-          cable.tank_location === "TANK-10"
-            ? "TANK-6"
-            : "TANK-1";
-        //check highest level in the toTank
-        const highestLevelInToTank = await spareCableModel
-          .find({ tank_location: toTank, tank: cable.tank })
-          .sort({ tank_level: -1 })
-          .limit(1);
-        const highestLevelCable = highestLevelInToTank[0];
-        const highestLevel = highestLevelCable
-          ? highestLevelCable.tank_level
-          : 0;
-        const newLevel = highestLevel + 1;
-        //update cable tank and tank_location
+        //update cable tank level
         await spareCableModel.updateOne(
           { _id: cable._id },
           {
             $set: {
-              tank_location: toTank,
-              tank_level: newLevel,
+              tank_level: cable.tank_level - 1,
             },
           }
         );
-        return res.send(cable);
       })
     );
 

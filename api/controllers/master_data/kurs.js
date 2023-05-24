@@ -27,3 +27,22 @@ exports.createKurs = async (req, res, next) => {
       });
     });
 };
+
+exports.getKurs = async (req, res, next) => {
+  KurSchema.findOne()
+    .sort({ _id: -1 })
+    .then((result) => {
+      res.status(200).json({
+        msg: "Kurs retrieved successfully.",
+        sukses: true,
+        usd: result.usdToIdr,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        sukses: false,
+        msg: "Oops, failed to retrieve kurs data.",
+        data: [],
+      });
+    });
+};
