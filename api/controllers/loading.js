@@ -34,9 +34,12 @@ exports.addCableToLoading = async (req, res, next) => {
       });
     }
     // search for the cable document by id
-    const cable = await spareCableModel.findById(cables_id);
+    let cable = await spareCableModel.findById(cables_id);
 
-    loading.cables_id.push({ _id: cables_id, priceIdr, priceUsd });
+    loading.cables_id.push(cables_id);
+    cable.priceIdr = priceIdr;
+    cable.priceUsd = priceUsd;
+    await cable.save();
     // save loading in the database
     await loading.save();
     res.status(201).json({
@@ -254,8 +257,33 @@ exports.getLoadingById = async (req, res, next) => {
     // find the loading document by id and populate the array cables_id field
     const loading = await loadingModel
       .findById(loadingId)
-      .populate("cables_id._id");
-
+      .populate("diserahkan")
+      .populate("diketahui")
+      .populate("perusahaan")
+      .populate("cables_id")
+      .populate({
+        path: "cables_id",
+        populate: {
+          path: "system cable_type manufacturer armoring_type core_type",
+        },
+      })
+      .populate("kits_id")
+      .populate("submitted_kits")
+      .populate({ path: "submitted_kits", populate: { path: "system" } })
+      .populate("submitted_cables_turnover")
+      .populate({
+        path: "submitted_cables_turnover",
+        populate: {
+          path: "system cable_type manufacturer armoring_type core_type",
+        },
+      })
+      .populate("submitted_cables")
+      .populate({
+        path: "submitted_cables",
+        populate: {
+          path: "system cable_type manufacturer armoring_type core_type",
+        },
+      });
     res.status(200).json({
       message: "Loading fetched successfully!",
       loading: [loading],
@@ -333,7 +361,8 @@ exports.getTurnoverByLoadingId = async (req, res, next) => {
             tank_location: cable.tank_location,
             tank_level: { $gt: cable.tank_level },
           })
-          .sort({ tank_level: -1 });
+          .sort({ tank_level: -1 })
+          .populate("system manufacturer cable_type armoring_type core_type");
       })
     );
 
@@ -355,7 +384,6 @@ exports.getTurnoverByLoadingId = async (req, res, next) => {
   }
 };
 
-// loading submittion belum beres
 exports.loadingSubmittion = async (req, res, next) => {
   try {
     const loading = await loadingModel.findById(req.params.loadingId);
@@ -371,7 +399,6 @@ exports.loadingSubmittion = async (req, res, next) => {
         message: "Loading cables is empty!",
       });
     }
-
     // move the cable from spare cable to submitted cable
     const cables = await spareCableModel.find({
       _id: { $in: loading.cables_id },

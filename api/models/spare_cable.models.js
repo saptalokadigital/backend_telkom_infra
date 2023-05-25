@@ -68,6 +68,12 @@ const spareCableSchema = new Schema(
     E_core: {
       type: Number,
     },
+    priceIdr: {
+      type: Number,
+    },
+    priceUsd: {
+      type: Number,
+    },
   },
   { versionKey: false }
 );
