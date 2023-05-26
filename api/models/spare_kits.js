@@ -13,8 +13,7 @@ const spareKitsSchema = new Schema(
     part_number: { type: String, require: true },
     serial_number: { type: String, require: true },
     system: { type: mongoose.Schema.Types.ObjectId, ref: "System" },
-
-    weight: { type: Number },
+    weight_kg: { type: Number },
     qty: { type: Number },
     unit: { type: String, require: true },
     keterangan: { type: String, require: true },
@@ -22,6 +21,8 @@ const spareKitsSchema = new Schema(
     aktivitas_transaksi: { type: String, require: true },
     from_to: { type: String, require: true },
     nomor_berita_acara: { type: String, require: true },
+    unitPriceIdr: { type: Number },
+    unitPriceUsd: { type: Number },
   },
   { versionKey: false }
 );

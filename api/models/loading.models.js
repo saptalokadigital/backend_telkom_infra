@@ -29,5 +29,7 @@ const loadingSchema = mongoose.Schema({
     contentType: String,
     originalName: String,
   },
+  submitted_date_loading: { type: String },
+  submitted_date_offloading: { type: String },
 });
 module.exports = mongoose.model("loading", loadingSchema);

@@ -4,6 +4,7 @@ const submittedCableModel = require("../models/submitted_cable");
 const submittedKitModel = require("../models/submitted_kit");
 const submittedTurnoverModel = require("../models/submitted_turnover");
 const spareKitModel = require("../models/spare_kits");
+const moment = require("moment-timezone");
 const fs = require("fs");
 require("dotenv").config();
 
@@ -152,7 +153,7 @@ exports.removeCableFromLoading = async (req, res, next) => {
 };
 
 exports.addKitToLoading = async (req, res, next) => {
-  const { kits_id } = req.body;
+  const { kits_id, unitPriceIdr, unitPriceUsd } = req.body;
   if (kits_id > 0) {
     const isValidIds = comments.every((kits_id) =>
       mongoose.Types.ObjectId.isValid(kits_id)
@@ -166,7 +167,6 @@ exports.addKitToLoading = async (req, res, next) => {
     const loading = await loadingModel.findById(req.params.loadingId);
     // add the new kit id to the array
     // check if the kit id is already in the array
-
     if (
       loading.kits_id.some((kit) => kit._id.toString() === kits_id.toString())
     ) {
@@ -175,7 +175,10 @@ exports.addKitToLoading = async (req, res, next) => {
         loading: loading,
       });
     }
-
+    let kit = await spareKitModel.findById(kits_id);
+    kit.unitPriceIdr = unitPriceIdr;
+    kit.unitPriceUsd = unitPriceUsd;
+    await kit.save();
     loading.kits_id.push(kits_id);
     // save loading in the database
     await loading.save();
@@ -466,6 +469,29 @@ exports.loadingSubmittion = async (req, res, next) => {
         loading.submitted_cables.push(submittedCable);
       })
     );
+    // take get now and then push to loading
+    // Buat objek Date saat ini
+    const now = new Date();
+
+    // Dapatkan waktu saat ini dalam milidetik
+    const currentTime = now.getTime();
+
+    // Buat objek Date dengan waktu Jakarta
+    const jakartaDate = new Date(currentTime);
+
+    // Dapatkan tanggal, bulan, dan tahun dari jakartaDate
+    const day = jakartaDate.getDate();
+    const month = jakartaDate.getMonth() + 1;
+    const year = jakartaDate.getFullYear();
+
+    // Format tanggal dalam format "DD-MM-YYYY"
+    const formattedDate = `${day < 10 ? "0" + day : day}-${
+      month < 10 ? "0" + month : month
+    }-${year}`;
+
+    // Simpan dalam loading.submitted_date_loading
+    loading.submitted_date_loading = formattedDate;
+
     await loading.save();
     // move the kit from spare kit to submitted kit
     const kits = await spareKitModel.find({
