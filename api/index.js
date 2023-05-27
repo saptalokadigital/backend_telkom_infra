@@ -12,8 +12,8 @@ const logger = require("./logger");
 async function startServer() {
   await connectToDatabase();
 
-  app.use(express.json());
   app.use(cors());
+  app.use(express.json());
   app.use(morgan("dev"));
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
