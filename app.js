@@ -3,8 +3,9 @@ const express = require("express");
 const morgan = require("morgan");
 const app = express();
 const bodyParser = require("body-parser");
+const PORT = process.env.PORT || 1000;
 const mongoose = require("mongoose");
-const mongoUrl = `${process.env.MONGO_URL}`;
+
 const cors = require("cors");
 
 const userRoutes = require("./api/routes/user");
@@ -32,20 +33,15 @@ const reportRoutes = require("./api/routes/report");
 const spareCableNewMaterialRoutes = require("./api/routes/newMaterial");
 const dashboardRoutes = require("./api/routes/dashboard");
 const kursRouter = require("./api/routes/master_data/kurs");
-
-mongoose
-  .connect(mongoUrl, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("Berhasil Connect Ke Database");
-  })
-  .catch((e) => {
-    console.log(e);
-    console.log("Gagal Connect Ke Database");
-  });
-
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.log(error);
+    process.exit(1);
+  }
+};
 app.use(cors());
 
 app.use(express.json());
@@ -182,5 +178,9 @@ app.use((error, req, res, next) => {
     },
   });
 });
-
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log("listening for requests");
+  });
+});
 module.exports = app;
