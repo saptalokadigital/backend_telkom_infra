@@ -4,7 +4,7 @@
   "description": "Create api signin and signup for node js mongoDB and flutter",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js | ./node_modules/.bin/pino-pretty --translateTime --colorize",
+    "start": "node index.js",
     "dev": "nodemon index.js"
   },
   "author": "ramahartadi <ramahartadi51@gmail.com>",
