@@ -153,7 +153,7 @@ exports.removeCableFromLoading = async (req, res, next) => {
 };
 
 exports.addKitToLoading = async (req, res, next) => {
-  const { kits_id, unitPriceIdr, unitPriceUsd } = req.body;
+  const { kits_id, unitPriceIdr, unitPriceUsd, qty } = req.body;
   if (kits_id > 0) {
     const isValidIds = comments.every((kits_id) =>
       mongoose.Types.ObjectId.isValid(kits_id)
@@ -176,6 +176,13 @@ exports.addKitToLoading = async (req, res, next) => {
       });
     }
     let kit = await spareKitModel.findById(kits_id);
+    // check qty in stock is enough
+    if (kit.qty < qty) {
+      return res.status(400).json({
+        message: "Qty pada kit tidak cukup!",
+        loading: loading,
+      });
+    }
     kit.unitPriceIdr = unitPriceIdr;
     kit.unitPriceUsd = unitPriceUsd;
     await kit.save();

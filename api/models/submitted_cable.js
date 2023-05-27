@@ -80,6 +80,9 @@ const submittedCableSchema = new Schema({
   priceUsd: {
     type: Number,
   },
+  length_returned: {
+    type: Number,
+  },
 });
 
 submittedCableSchema.set("toJSON", {

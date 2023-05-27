@@ -4,7 +4,7 @@ const morgan = require("morgan");
 const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const mongoUrl = "mongodb://127.0.0.1:27017/telkominfra";
+const mongoUrl = `${process.env.MONGO_URL}`;
 const cors = require("cors");
 
 const userRoutes = require("./api/routes/user");

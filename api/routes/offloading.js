@@ -6,8 +6,9 @@ const auth = require("../middleware/auth");
 
 router.get("/", loadingController.getLoading);
 router.get("/:loadingId", loadingController.getLoadingById);
-router.post(
-    "/:loadingId/loading/:cableId",
-    offloadingController.offloadingExisting
-);
+// router.post(
+//     "/:loadingId/loading/:cableId",
+//     offloadingController.offloadingExisting
+// );
+router.get("/:loadingId/:cableId", offloadingController.addCableToOffloading);
 module.exports = router;
