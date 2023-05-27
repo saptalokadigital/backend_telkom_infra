@@ -19,7 +19,7 @@ const loadingSchema = mongoose.Schema({
     { type: mongoose.Schema.Types.ObjectId, ref: "submitted_cable" },
   ],
   submitted_existing_cables_id: [
-    { type: mongoose.Schema.Types.ObjectId, ref: "submitted_cable" },
+    { type: mongoose.Schema.Types.ObjectId, ref: "spare_cable" },
   ],
   project_name: { type: String, require: true },
   vessel_name: { type: String, require: true },
