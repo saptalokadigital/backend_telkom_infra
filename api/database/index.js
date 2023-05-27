@@ -19,7 +19,6 @@ async function connectToDatabase() {
         console.log(e);
         console.log("Gagal Connect Ke Database");
       });
-    console.log("Connected to database");
   } catch (e) {
     logger.error(e);
     throw e;
