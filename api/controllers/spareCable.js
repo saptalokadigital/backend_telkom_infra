@@ -1,6 +1,5 @@
 const spareCableModel = require("../models/spare_cable.models");
 require("dotenv").config();
-const { errorHandler } = require("../util");
 
 // exports.postSpareCable = async (req, res, next) => {
 //     try {
@@ -68,7 +67,7 @@ exports.getPage = (req, res, next) => {
     });
 };
 
-exports.getCablePopulate = errorHandler(async (req, res, next) => {
+exports.getCablePopulate = (req, res, next) => {
   spareCableModel
     .aggregate([
       {
@@ -162,7 +161,7 @@ exports.getCablePopulate = errorHandler(async (req, res, next) => {
         res.json(cables);
       }
     });
-});
+};
 
 exports.createSpareCable = async (req, res, next) => {
   const tank = req.body.tank;
