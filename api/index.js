@@ -10,8 +10,6 @@ const cors = require("cors");
 const logger = require("./logger");
 
 async function startServer() {
-  await connectToDatabase();
-
   app.use(cors());
   app.use(express.json());
   app.use(morgan("dev"));
@@ -25,8 +23,14 @@ async function startServer() {
     res.status(err.statusCode || 500).send({ error: err.message });
   });
 
-  app.listen(port, () => {
-    logger.info(`Server running at http://localhost:${port}/`);
-  });
+  connectToDatabase()
+    .then(() => {
+      app.listen(port, () => {
+        logger.info(`Server running at http://localhost:${port}/`);
+      });
+    })
+    .catch((error) => {
+      logger.error(error);
+    });
 }
 module.exports = startServer;
