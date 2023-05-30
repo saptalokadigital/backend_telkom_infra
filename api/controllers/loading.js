@@ -8,6 +8,30 @@ const moment = require("moment-timezone");
 const fs = require("fs");
 require("dotenv").config();
 
+function convertToRoman(num) {
+  const romanNumerals = [
+    { value: 1, numeral: "I" },
+    { value: 2, numeral: "II" },
+    { value: 3, numeral: "III" },
+    { value: 4, numeral: "IV" },
+    { value: 5, numeral: "V" },
+    { value: 6, numeral: "VI" },
+    { value: 7, numeral: "VII" },
+    { value: 8, numeral: "VIII" },
+    { value: 9, numeral: "IX" },
+    { value: 10, numeral: "X" },
+    { value: 11, numeral: "XI" },
+    { value: 12, numeral: "XII" },
+  ];
+
+  for (let i = 0; i < romanNumerals.length; i++) {
+    if (num === romanNumerals[i].value) {
+      return romanNumerals[i].numeral;
+    }
+  }
+  return num; // Jika angka tidak ada dalam rentang 1-12, kembalikan angka aslinya
+}
+
 exports.addCableToLoading = async (req, res, next) => {
   const { cables_id, priceIdr, priceUsd } = req.body;
   if (cables_id > 0) {
@@ -295,7 +319,19 @@ exports.getLoadingById = async (req, res, next) => {
         },
       })
       .populate("existing_cables_id")
-      .populate("submitted_existing_cables_id");
+      .populate("submitted_existing_cables_id")
+      .populate({
+        path: "existing_cables_id",
+        populate: {
+          path: "system cable_type manufacturer armoring_type core_type",
+        },
+      })
+      .populate({
+        path: "submitted_existing_cables_id",
+        populate: {
+          path: "system cable_type manufacturer armoring_type core_type",
+        },
+      });
     res.status(200).json({
       message: "Loading fetched successfully!",
       loading: [loading],
@@ -310,6 +346,48 @@ exports.getLoadingById = async (req, res, next) => {
 
 exports.postLoading = async (req, res, next) => {
   let data = new loadingModel(req.body);
+  //search all no_bast in loading,sort it and get the last one then add 1
+  const date = new Date();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  data.month = month;
+  data.year = year;
+  const lastNoBastLoading = await loadingModel
+    .find({ month: month, year: year })
+    .sort({ first_digit_bast: -1 })
+    .limit(1);
+
+  if (lastNoBastLoading.length === 0) {
+    data.first_digit_bast = 1;
+  } else {
+    const lastNoBast = lastNoBastLoading[0].first_digit_bast;
+    data.first_digit_bast = lastNoBast + 1;
+  }
+
+  //search all no_bast in loading,sort it and get the last one then add 1
+  const lastNoInvoiceLoading = await loadingModel
+    .find({
+      month: month,
+      year: year,
+    })
+    .sort({ first_digit_invoice: -1 })
+    .limit(1);
+
+  //check lastNoBast undefined or not
+  if (lastNoInvoiceLoading.length === 0) {
+    data.first_digit_invoice = 1;
+  } else {
+    const lastNoInvoice = lastNoInvoiceLoading[0].first_digit_invoice;
+    data.first_digit_invoice = lastNoInvoice + 1;
+  }
+
+  // format the no_bast to first_digit_bast/BAST_Loading/Month/Year
+  // get month and year data from date now
+  const romanMonth = convertToRoman(month);
+
+  data.no_bast = `${data.first_digit_bast}/BAST_Loading/${romanMonth}/${year}`;
+  data.no_invoice = `${data.first_digit_invoice}/TI/${romanMonth}/${year}`;
+
   const result = await data.save();
   res.status(201).json({ success: true, id: result._id, loading: result });
 };
