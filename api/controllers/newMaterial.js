@@ -1,5 +1,7 @@
 const spareCableModel = require("../models/spare_cable.models");
 const cableNewMaterial = require("../models/spare_cable_new_material.models");
+const kitNewMaterial = require("../models/spare_kits_new_material.models");
+const spareKitModel = require("../models/spare_kits");
 const offloadingNewMaterialModel = require("../models/loading_new_material.models");
 
 function convertToRoman(num) {
@@ -90,6 +92,26 @@ exports.getOffloadingNewMaterialById = async (req, res, next) => {
         populate: {
           path: "system cable_type manufacturer armoring_type core_type",
         },
+      })
+      .populate("new_material_kits")
+      .populate({
+        path: "new_material_kits",
+        populate: {
+          path: "system",
+        },
+      })
+      .populate({
+        path: "submitted_new_material_cables_id_in_spare_cable",
+        populate: {
+          path: "system cable_type manufacturer armoring_type core_type",
+        },
+      })
+      .populate("submitted_new_material_kits_id_in_spare_kits")
+      .populate({
+        path: "new_material_kits",
+        populate: {
+          path: "system",
+        },
       });
     res.status(200).json(offloadingNewMaterial);
   } catch (error) {
@@ -130,6 +152,181 @@ exports.getAllOffloadingNewMaterial = async (req, res, next) => {
       .find()
       .select("-evidence");
     res.status(200).json(offloadingNewMaterial);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.addKitToOffloadingNewMaterial = async (req, res, next) => {
+  try {
+    const offloadingId = req.params.offloadingId;
+    let data = new kitNewMaterial(req.body);
+    const result = await data.save();
+
+    const offloadingNewMaterial = await offloadingNewMaterialModel.findById(
+      offloadingId
+    );
+    await offloadingNewMaterial.new_material_kits.push(result._id);
+
+    await offloadingNewMaterial.save();
+
+    res
+      .status(201)
+      .json({ success: true, offloadingNewMaterial: offloadingNewMaterial });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.removeCableFromOffloadingNewMaterial = async (req, res, next) => {
+  try {
+    const offloadingId = req.params.offloadingId;
+    const cableId = req.params.cableId;
+
+    const offloadingNewMaterial = await offloadingNewMaterialModel.findById(
+      offloadingId
+    );
+
+    await offloadingNewMaterial.new_material_cables.pull(cableId);
+
+    await offloadingNewMaterial.save();
+
+    // delete the cable from cableNewMaterial collection
+    await cableNewMaterial.findByIdAndDelete(cableId);
+
+    res
+      .status(201)
+      .json({ success: true, offloadingNewMaterial: offloadingNewMaterial });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.removeKitFromOffloadingNewMaterial = async (req, res, next) => {
+  try {
+    const offloadingId = req.params.offloadingId;
+    const kitId = req.params.kitId;
+
+    const offloadingNewMaterial = await offloadingNewMaterialModel.findById(
+      offloadingId
+    );
+
+    await offloadingNewMaterial.new_material_kits.pull(kitId);
+
+    await offloadingNewMaterial.save();
+
+    // delete the cable from cableNewMaterial collection
+    await kitNewMaterial.findByIdAndDelete(kitId);
+
+    res
+      .status(201)
+      .json({ success: true, offloadingNewMaterial: offloadingNewMaterial });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.offloadingNewMaterialSubmittion = async (req, res, next) => {
+  try {
+    const offloadingId = req.params.offloadingId;
+    const offloadingNewMaterial = await offloadingNewMaterialModel.findById(
+      offloadingId
+    );
+
+    if (offloadingNewMaterial.status === "Submitted") {
+      return res.status(400).json({
+        message: "This offloading has been submitted!",
+      });
+    }
+
+    if (
+      offloadingNewMaterial.new_material_cables.length === 0 &&
+      offloadingNewMaterial.new_material_kits.length === 0
+    ) {
+      return res.status(400).json({
+        message: "Offloading cables and is empty!",
+      });
+    }
+
+    const cables = await cableNewMaterial.find({
+      _id: { $in: offloadingNewMaterial.new_material_cables },
+    });
+
+    for (const cable of cables) {
+      const cableObj = cable.toObject();
+      delete cableObj._id;
+
+      const tank = cableObj.tank;
+      const tank_location = cableObj.tank_location;
+
+      let highest_tank = 0;
+      let tankLevelMap = new Map();
+      let nextTankLevels = new Map();
+      if (tank && tank_location) {
+        const highest_tank_cable = await spareCableModel
+          .find({ tank: tank, tank_location: tank_location })
+          .sort({ tank_level: -1 })
+          .limit(1);
+
+        if (highest_tank_cable.length > 0) {
+          highest_tank = highest_tank_cable[0].tank_level;
+        }
+
+        if (tankLevelMap.has(tank_location)) {
+          nextTankLevels.set(
+            tank_location,
+            tankLevelMap.get(tank_location) + 1
+          );
+        } else {
+          nextTankLevels.set(tank_location, highest_tank + 1);
+        }
+        tankLevelMap.set(tank_location, nextTankLevels.get(tank_location));
+      }
+
+      cableObj.tank_level = nextTankLevels.get(tank_location);
+      const spareCable = new spareCableModel(cableObj);
+      await spareCable.save();
+      await offloadingNewMaterial.submitted_new_material_kits_id_in_spare_kits.push(
+        spareCable._id
+      );
+    }
+
+    const kits = await kitNewMaterial.find({
+      _id: { $in: offloadingNewMaterial.new_material_kits },
+    });
+
+    kits.map(async (kit) => {
+      const kitObj = kit.toObject();
+      delete kitObj._id;
+
+      const newKit = new spareKitModel(kitObj);
+      await newKit.save();
+
+      await offloadingNewMaterial.submitted_new_material_kits_id_in_spare_kits.push(
+        newKit._id
+      );
+    });
+
+    offloadingNewMaterial.status = "Submitted";
+
+    await offloadingNewMaterial.save();
+
+    res.status(200).json({
+      success: true,
+      offloadingNewMaterial: offloadingNewMaterial,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
