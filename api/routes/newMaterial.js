@@ -16,6 +16,7 @@ router.post("/create", newMaterialController.createLoadingNewMaterial);
 //   "/addCable/:offloadingId",
 //   newMaterialController.addCableNewMaterial
 // );
+router.get("/all", newMaterialController.getAllOffloadingNewMaterial);
 router.get(
   "/:offloadingId",
   newMaterialController.getOffloadingNewMaterialById

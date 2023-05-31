@@ -272,8 +272,8 @@ exports.offloadingSubmittion = async (req, res, next) => {
   // get month and year loading from date now
   const romanMonth = convertToRoman(month);
 
-  loading.no_bast_offloading = `${loading.first_digit_bast}/BAST_Off_Loading/${romanMonth}/${year}`;
-  loading.no_invoice_offloading = `${loading.first_digit_invoice}/TI/${romanMonth}/${year}`;
+  loading.no_bast_offloading = `${loading.first_digit_bast_offloading}/BAST_Off_Loading/${romanMonth}/${year}`;
+  loading.no_invoice_offloading = `${loading.first_digit_invoice_offloading}/TI/${romanMonth}/${year}`;
 
   // Simpan dalam loading.submitted_date_loading
   loading.submitted_date_offloading = formattedDate;

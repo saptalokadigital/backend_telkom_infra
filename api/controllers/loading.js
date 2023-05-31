@@ -302,6 +302,12 @@ exports.getLoadingById = async (req, res, next) => {
         },
       })
       .populate("kits_id")
+      .populate({
+        path: "kits_id",
+        populate: {
+          path: "system",
+        },
+      })
       .populate("submitted_kits")
       .populate({ path: "submitted_kits", populate: { path: "system" } })
       .populate("submitted_cables_turnover")
