@@ -123,3 +123,17 @@ exports.addCableToOffloadingNewMaterial = async (req, res, next) => {
     });
   }
 };
+
+exports.getAllOffloadingNewMaterial = async (req, res, next) => {
+  try {
+    const offloadingNewMaterial = await offloadingNewMaterialModel
+      .find()
+      .select("-evidence");
+    res.status(200).json(offloadingNewMaterial);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
