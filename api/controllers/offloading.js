@@ -147,7 +147,7 @@ exports.offloadingSubmittion = async (req, res, next) => {
     //check if existing is empty
     if (loading.existing_cables_id.length === 0) {
       return res.status(400).json({
-        message: "Loading cables is empty!",
+        message: "Offoading cables is empty!",
       });
     }
     // move the cable from spare cable to submitted cable

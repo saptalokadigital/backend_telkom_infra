@@ -44,7 +44,7 @@ router.use("/updatingSpareCable", updatingSpareCableRoutes);
 router.use("/loading", loadingRoutes);
 router.use("/offloading", offloadingRoutes);
 router.use("/report", reportRoutes);
-router.use("/spareCableNewMaterial", spareCableNewMaterialRoutes);
+router.use("/offloadingNewMaterial", spareCableNewMaterialRoutes);
 router.use("/dashboard", dashboardRoutes);
 router.use("/kurs", kursRouter);
 

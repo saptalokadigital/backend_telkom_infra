@@ -43,5 +43,11 @@ const loadingSchema = mongoose.Schema({
   no_invoice: { type: String },
   month: { type: String },
   year: { type: String },
+  first_digit_bast_offloading: { type: Number },
+  no_bast_offloading: { type: String },
+  first_digit_invoice_offloading: { type: Number },
+  no_invoice_offloading: { type: String },
+  month_offloading: { type: String },
+  year_offloading: { type: String },
 });
 module.exports = mongoose.model("loading", loadingSchema);
