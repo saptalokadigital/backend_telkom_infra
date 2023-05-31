@@ -347,9 +347,19 @@ exports.getLoadingById = async (req, res, next) => {
 exports.postLoading = async (req, res, next) => {
   let data = new loadingModel(req.body);
   //search all no_bast in loading,sort it and get the last one then add 1
-  const date = new Date();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
+
+  // Buat objek Date saat ini
+  const now = new Date();
+
+  // Dapatkan waktu saat ini dalam milidetik
+  const currentTime = now.getTime();
+
+  // Buat objek Date dengan waktu Jakarta
+  const jakartaDate = new Date(currentTime);
+
+  // Dapatkan tanggal, bulan, dan tahun dari jakartaDate
+  const month = jakartaDate.getMonth() + 1;
+  const year = jakartaDate.getFullYear();
   data.month = month;
   data.year = year;
   const lastNoBastLoading = await loadingModel

@@ -2,7 +2,29 @@ const loadingModel = require("../models/loading.models");
 const spareCableModel = require("../models/spare_cable.models");
 const submittedCableModel = require("../models/submitted_cable");
 require("dotenv").config();
+function convertToRoman(num) {
+  const romanNumerals = [
+    { value: 1, numeral: "I" },
+    { value: 2, numeral: "II" },
+    { value: 3, numeral: "III" },
+    { value: 4, numeral: "IV" },
+    { value: 5, numeral: "V" },
+    { value: 6, numeral: "VI" },
+    { value: 7, numeral: "VII" },
+    { value: 8, numeral: "VIII" },
+    { value: 9, numeral: "IX" },
+    { value: 10, numeral: "X" },
+    { value: 11, numeral: "XI" },
+    { value: 12, numeral: "XII" },
+  ];
 
+  for (let i = 0; i < romanNumerals.length; i++) {
+    if (num === romanNumerals[i].value) {
+      return romanNumerals[i].numeral;
+    }
+  }
+  return num; // Jika angka tidak ada dalam rentang 1-12, kembalikan angka aslinya
+}
 //get all loading
 exports.getLoading = async (req, res, next) => {
   const loading = await loadingModel.find();
@@ -143,32 +165,6 @@ exports.addCableToOffloading = async (req, res, next) => {
 };
 
 exports.offloadingSubmittion = async (req, res, next) => {
-  try {
-    const offloading = await loadingModel.findById(req.params.loadingId);
-    if (!offloading) {
-      return res.status(404).json({
-        message: "Offloading not found!",
-      });
-    }
-    //check if existing is empty
-    if (loading.existing_cables_id.length === 0) {
-      return res.status(400).json({
-        message: "Loading cables is empty!",
-      });
-    }
-    // move the cable from spare cable to submitted cable
-    const cables = await spareCableModel.find({
-      _id: { $in: loading.cables_id },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Something went wrong!",
-    });
-  }
-};
-
-exports.offloadingSubmittion = async (req, res, next) => {
   const loading = await loadingModel.findById(req.params.loadingId);
   if (!loading) {
     return res.status(404).json({
@@ -238,6 +234,46 @@ exports.offloadingSubmittion = async (req, res, next) => {
   const formattedDate = `${day < 10 ? "0" + day : day}-${
     month < 10 ? "0" + month : month
   }-${year}`;
+
+  // BAST dan Invoice
+  loading.month_offloading = month;
+  loading.year_offloading = year;
+  const lastNoBastLoading = await loadingModel
+    .find({ month_offloading: month, year_offloading: year })
+    .sort({ first_digit_bast_offloading: -1 })
+    .limit(1);
+
+  if (lastNoBastLoading.length === 0) {
+    loading.first_digit_bast_offloading = 1;
+  } else {
+    const lastNoBast = lastNoBastLoading[0].first_digit_bast_offloading;
+    loading.first_digit_bast_offloading = lastNoBast + 1;
+  }
+
+  //search all no_bast in loading,sort it and get the last one then add 1
+  const lastNoInvoiceLoading = await loadingModel
+    .find({
+      month_offloading: month,
+      year_offloading: year,
+    })
+    .sort({ first_digit_invoice_offloading: -1 })
+    .limit(1);
+
+  //check lastNoBast undefined or not
+  if (lastNoInvoiceLoading.length === 0) {
+    loading.first_digit_invoice_offloading = 1;
+  } else {
+    const lastNoInvoice =
+      lastNoInvoiceLoading[0].first_digit_invoice_offloading;
+    loading.first_digit_invoice_offloading = lastNoInvoice + 1;
+  }
+
+  // format the no_bast to first_digit_bast/BAST_Loading/Month/Year
+  // get month and year loading from date now
+  const romanMonth = convertToRoman(month);
+
+  loading.no_bast_offloading = `${loading.first_digit_bast}/BAST_Off_Loading/${romanMonth}/${year}`;
+  loading.no_invoice_offloading = `${loading.first_digit_invoice}/TI/${romanMonth}/${year}`;
 
   // Simpan dalam loading.submitted_date_loading
   loading.submitted_date_offloading = formattedDate;

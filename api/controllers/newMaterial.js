@@ -1,340 +1,121 @@
 const spareCableModel = require("../models/spare_cable.models");
 const cableNewMaterial = require("../models/spare_cable_new_material.models");
-const loadingNewMaterial = require("../models/loading_new_material.models");
-const User = require("../models/user");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+const offloadingNewMaterialModel = require("../models/loading_new_material.models");
 
-exports.postSpareCableNewMaterial = async (req, res, next) => {
+function convertToRoman(num) {
+  const romanNumerals = [
+    { value: 1, numeral: "I" },
+    { value: 2, numeral: "II" },
+    { value: 3, numeral: "III" },
+    { value: 4, numeral: "IV" },
+    { value: 5, numeral: "V" },
+    { value: 6, numeral: "VI" },
+    { value: 7, numeral: "VII" },
+    { value: 8, numeral: "VIII" },
+    { value: 9, numeral: "IX" },
+    { value: 10, numeral: "X" },
+    { value: 11, numeral: "XI" },
+    { value: 12, numeral: "XII" },
+  ];
+
+  for (let i = 0; i < romanNumerals.length; i++) {
+    if (num === romanNumerals[i].value) {
+      return romanNumerals[i].numeral;
+    }
+  }
+  return num; // Jika angka tidak ada dalam rentang 1-12, kembalikan angka aslinya
+}
+
+exports.createLoadingNewMaterial = async (req, res, next) => {
+  let data = new offloadingNewMaterialModel(req.body);
+  //search all no_bast in loading,sort it and get the last one then add 1
+
+  // Buat objek Date saat ini
+  const now = new Date();
+
+  // Dapatkan waktu saat ini dalam milidetik
+  const currentTime = now.getTime();
+
+  // Buat objek Date dengan waktu Jakarta
+
+  const jakartaDate = new Date(currentTime);
+
+  // Dapatkan tanggal, bulan, dan tahun dari jakartaDate
+  const day = jakartaDate.getDate();
+  const month = jakartaDate.getMonth() + 1;
+  const year = jakartaDate.getFullYear();
+
+  // Format tanggal dalam format "DD-MM-YYYY"
+  const formattedDate = `${day < 10 ? "0" + day : day}-${
+    month < 10 ? "0" + month : month
+  }-${year}`;
+
+  data.date = formattedDate;
+
+  data.month = month;
+  data.year = year;
+  const lastNoBastNewMaterial = await offloadingNewMaterialModel
+    .find({
+      month: month,
+      year: year,
+    })
+    .sort({ first_digit_bast: -1 })
+    .limit(1);
+
+  if (lastNoBastNewMaterial.length === 0) {
+    data.first_digit_bast = 1;
+  } else {
+    const lastNoBast = lastNoBastNewMaterial[0].first_digit_bast;
+    data.first_digit_bast = lastNoBast + 1;
+  }
+
+  // format the no_bast to first_digit_bast/BAST_Loading/Month/Year
+  // get month and year data from date now
+  const romanMonth = convertToRoman(month);
+
+  data.no_bast = `${data.first_digit_bast}/BAST_New_Material/${romanMonth}/${year}`;
+
+  const result = await data.save();
+  res.status(201).json({ success: true, id: result._id, loading: result });
+};
+
+exports.getOffloadingNewMaterialById = async (req, res, next) => {
+  const offloadingId = req.params.offloadingId;
   try {
+    const offloadingNewMaterial = await offloadingNewMaterialModel
+      .findById(offloadingId)
+      .populate("new_material_cables")
+      .populate({
+        path: "new_material_cables",
+        populate: {
+          path: "system cable_type manufacturer armoring_type core_type",
+        },
+      });
+    res.status(200).json(offloadingNewMaterial);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.addCableToOffloadingNewMaterial = async (req, res, next) => {
+  try {
+    const offloadingId = req.params.offloadingId;
     let data = new cableNewMaterial(req.body);
     const result = await data.save();
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
 
-    if (!token)
-      return res
-        .status(401)
-        .send({ auth: false, message: "No token provided." });
-    jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
-      if (err)
-        return res.status(500).send({
-          auth: false,
-          message: "Failed to authenticate token inside.",
-        });
-      const user = await User.findById(decoded.userId);
-      // check if cable is already in cart
-      if (user.cartCableNewMaterial.includes(result._id)) {
-        return res.status(409).send({
-          message: "Cable already in cart.",
-        });
-      }
-      await user.cartCableNewMaterial.push(result._id);
-      await user.save();
-      return res
-        .status(200)
-        .send({ message: "Cable New Material added to cart." });
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to added spare cable data",
-    });
-  }
-};
-
-exports.getCartCablesNewMaterial = async (req, res, next) => {
-  try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token)
-      return res
-        .status(401)
-        .send({ auth: false, message: "No token provided." });
-    jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
-      if (err)
-        return res.status(500).send({
-          auth: false,
-          message: "Failed to authenticate token inside.",
-        });
-      const user = await User.findById(decoded.userId);
-      const cartCables = await cableNewMaterial.find({
-        _id: { $in: user.cartCableNewMaterial },
-      });
-      return res.status(200).send(cartCables);
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to get cart new material data",
-    });
-  }
-};
-
-exports.deleteCartCablesNewMaterial = async (req, res, next) => {
-  try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token)
-      return res
-        .status(401)
-        .send({ auth: false, message: "No token provided." });
-    jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
-      if (err)
-        return res.status(500).send({
-          auth: false,
-          message: "Failed to authenticate token inside.",
-        });
-      const user = await User.findById(decoded.userId);
-      await user.cartCableNewMaterial.pull(req.params.id);
-      await user.save();
-      return res.status(200).send({
-        message: "Cable deleted from cart.",
-      });
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to delete cart new material data",
-    });
-  }
-};
-
-exports.deleteAllCartCablesNewMaterial = async (req, res, next) => {
-  try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token)
-      return res
-        .status(401)
-        .send({ auth: false, message: "No token provided." });
-    jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
-      if (err)
-        return res.status(500).send({
-          auth: false,
-          message: "Failed to authenticate token inside.",
-        });
-      const user = await User.findById(decoded.userId);
-      user.cartCableNewMaterial = [];
-      await user.save();
-      return res.status(200).send({
-        message: "All cables deleted from cart.",
-      });
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to delete all cart new material data",
-    });
-  }
-};
-
-exports.editCartCablesNewMaterial = async (req, res, next) => {
-  try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token)
-      return res
-        .status(401)
-        .send({ auth: false, message: "No token provided." });
-    jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
-      if (err)
-        return res.status(500).send({
-          auth: false,
-          message: "Failed to authenticate token inside.",
-        });
-      const user = await User.findById(decoded.userId);
-      const cable = await cableNewMaterial.findById(req.params.id);
-      if (!user.cartCableNewMaterial.includes(cable._id)) {
-        return res.status(409).send({
-          message: "Cable not in cart.",
-        });
-      }
-      cable = req.body;
-      await cable.save();
-      return res.status(200).send({
-        message: "Cable updated.",
-      });
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to update cart new material data",
-    });
-  }
-};
-
-exports.submitCartCablesNewMaterial = async (req, res, next) => {
-  try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token) {
-      return res
-        .status(401)
-        .send({ auth: false, message: "No token provided." });
-    }
-    let newLoadingMaterial = new loadingNewMaterial({
-      date: req.body.date,
-
-      // add user id
-      user: req.body.user,
-    });
-    jwt.verify(token, process.env.JWT_KEY, async function (err, decoded) {
-      if (err) {
-        return res.status(500).send({
-          auth: false,
-          message: "Failed to authenticate token inside.",
-        });
-      }
-
-      const user = await User.findById(decoded.userId);
-
-      const cartCables = await cableNewMaterial.find({
-        _id: { $in: user.cartCableNewMaterial },
-      });
-
-      let tankLevelMap = new Map();
-      let nextTankLevels = new Map();
-
-      for (const cable of cartCables) {
-        const cableObj = cable.toObject();
-        delete cableObj._id;
-
-        const tank = cableObj.tank;
-        const tank_location = cableObj.tank_location;
-
-        let highest_tank = 0;
-        if (tank && tank_location) {
-          const highest_tank_cable = await spareCableModel
-            .find({ tank: tank, tank_location: tank_location })
-            .sort({ tank_level: -1 })
-            .limit(1);
-
-          if (highest_tank_cable.length > 0) {
-            highest_tank = highest_tank_cable[0].tank_level;
-          }
-
-          if (tankLevelMap.has(tank_location)) {
-            nextTankLevels.set(
-              tank_location,
-              tankLevelMap.get(tank_location) + 1
-            );
-          } else {
-            nextTankLevels.set(tank_location, highest_tank + 1);
-          }
-          tankLevelMap.set(tank_location, nextTankLevels.get(tank_location));
-        }
-
-        cableObj.tank_level = nextTankLevels.get(tank_location);
-        const spareCable = new spareCableModel(cableObj);
-        await spareCable.save();
-        newLoadingMaterial.cables_id.push(spareCable._id);
-        newLoadingMaterial.submitted_new_material.push(cable._id);
-      }
-
-      await newLoadingMaterial.save();
-      user.cartCableNewMaterial = [];
-      await user.save();
-
-      return res.status(200).send({ message: "Cart submitted." });
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to submit cart new material data",
-    });
-  }
-};
-
-exports.getAllSpareCableNewMaterial = async (req, res, next) => {
-  try {
-    const loading = await loadingNewMaterial.find();
-    return res.status(200).send(loading);
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to get all loading new material data",
-    });
-  }
-};
-
-exports.getSpareCableNewMaterialById = async (req, res, next) => {
-  try {
-    const loading = await loadingNewMaterial.findById(req.params._id);
-    return res.status(200).send(loading);
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to get loading new material data",
-    });
-  }
-};
-
-exports.uploadEvidenceSpareCableNewMaterial = async (req, res, next) => {
-  try {
-    try {
-      if (!req.file) {
-        return res.status(400).json({
-          message: "Please upload a file!",
-        });
-      }
-
-      const loading = await loadingNewMaterial.findById(req.params.loadingId);
-      if (!loading) {
-        return res.status(404).json({
-          message: "Loading not found!",
-        });
-      }
-
-      const { buffer, mimetype, originalname } = req.file;
-      const file = {
-        data: buffer,
-        contentType: mimetype,
-        originalName: originalname,
-      };
-
-      loading.evidence = file;
-      await loading.save();
-
-      res.status(201).json({
-        message: "Evidence added successfully!",
-        loading: loading,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: "Something went wrong!",
-      });
-    }
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ooopps, Failed to upload evidence new material data",
-    });
-  }
-};
-
-exports.downloadEvidenceSpareCableNewMaterial = async (req, res, next) => {
-  try {
-    const loading = await loadingNewMaterial.findById(req.params.loadingId);
-    if (!loading) {
-      return res.status(404).json({
-        message: "Loading not found!",
-      });
-    }
-
-    const file = loading.evidence;
-    if (!file) {
-      return res.status(404).json({
-        message: "File not found!",
-      });
-    }
-
-    // Set headers
-    res.setHeader("Content-Type", file.contentType);
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename=${file.originalName}`
+    const offloadingNewMaterial = await offloadingNewMaterialModel.findById(
+      offloadingId
     );
+    await offloadingNewMaterial.new_material_cables.push(result._id);
 
-    // Send buffer as response
-    res.send(file.data);
+    await offloadingNewMaterial.save();
+
+    res
+      .status(201)
+      .json({ success: true, offloadingNewMaterial: offloadingNewMaterial });
   } catch (error) {
     console.error(error);
     res.status(500).json({
