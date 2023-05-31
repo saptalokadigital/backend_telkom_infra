@@ -25,5 +25,21 @@ router.post(
   "/addCable/:offloadingId",
   newMaterialController.addCableToOffloadingNewMaterial
 );
+router.post(
+  "/addKit/:offloadingId",
+  newMaterialController.addKitToOffloadingNewMaterial
+);
+router.delete(
+  "/deleteCable/:offloadingId/:cableId",
+  newMaterialController.removeCableFromOffloadingNewMaterial
+);
+router.delete(
+  "/deleteKit/:offloadingId/:kitId",
+  newMaterialController.removeKitFromOffloadingNewMaterial
+);
+router.post(
+  "/submit/:offloadingId",
+  newMaterialController.offloadingNewMaterialSubmittion
+);
 
 module.exports = router;

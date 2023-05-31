@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const uniqueValidator = require("mongoose-unique-validator");
 const { Schema } = mongoose;
 
-const spareKitsSchema = new Schema(
+const spareKitsNewMaterialSchema = new Schema(
   {
     no: {
       type: Number,
@@ -27,7 +27,7 @@ const spareKitsSchema = new Schema(
   { versionKey: false }
 );
 
-spareKitsSchema.set("toJSON", {
+spareKitsNewMaterialSchema.set("toJSON", {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
     delete returnedObject._id;
@@ -36,9 +36,12 @@ spareKitsSchema.set("toJSON", {
   },
 });
 
-spareKitsSchema.plugin(uniqueValidator, {
+spareKitsNewMaterialSchema.plugin(uniqueValidator, {
   message: "Email/Username already in use.",
 });
 
-const spareKit = mongoose.model("spare_kit", spareKitsSchema);
+const spareKit = mongoose.model(
+  "spare_kit_new_material",
+  spareKitsNewMaterialSchema
+);
 module.exports = spareKit;
