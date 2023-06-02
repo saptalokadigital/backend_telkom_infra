@@ -41,5 +41,9 @@ router.post(
   "/submit/:offloadingId",
   newMaterialController.offloadingNewMaterialSubmittion
 );
+router.delete(
+  "/delete/:offloadingId",
+  newMaterialController.removeOffloadingById
+);
 
 module.exports = router;
