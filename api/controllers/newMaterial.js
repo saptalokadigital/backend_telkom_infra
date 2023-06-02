@@ -113,7 +113,7 @@ exports.getOffloadingNewMaterialById = async (req, res, next) => {
           path: "system",
         },
       });
-    res.status(200).json(offloadingNewMaterial);
+    res.status(200).json([offloadingNewMaterial]);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -245,7 +245,7 @@ exports.offloadingNewMaterialSubmittion = async (req, res, next) => {
       offloadingId
     );
 
-    if (offloadingNewMaterial.status === "Submitted") {
+    if (offloadingNewMaterial.isSubmitted === true) {
       return res.status(400).json({
         message: "This offloading has been submitted!",
       });
@@ -319,13 +319,36 @@ exports.offloadingNewMaterialSubmittion = async (req, res, next) => {
       );
     });
 
-    offloadingNewMaterial.status = "Submitted";
+    offloadingNewMaterial.isSubmitted = true;
 
     await offloadingNewMaterial.save();
 
     res.status(200).json({
       success: true,
       offloadingNewMaterial: offloadingNewMaterial,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.removeOffloadingById = async (req, res, next) => {
+  try {
+    const offloadingId = req.params.offloadingId;
+    const offloading = await offloadingNewMaterialModel.findById(offloadingId);
+    if (offloading.isSubmitted === true) {
+      return res.status(400).json({
+        message: "This offloading has been submitted! Cannot be deleted!",
+      });
+    }
+
+    await offloadingNewMaterialModel.findByIdAndDelete(offloadingId);
+    res.status(200).json({
+      success: true,
+      message: "Offloading deleted successfully!",
     });
   } catch (error) {
     console.error(error);
