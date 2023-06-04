@@ -1,7 +1,7 @@
 const spareCableModel = require("../models/spare_cable.models");
 require("dotenv").config();
 
-// exports.postSpareCable = async (req, res, next) => {
+// exports.postSpareCable = async (req, res) => {
 //     try {
 //         let data = new spareCableModel(req.body);
 //         return res.send(data);
@@ -16,7 +16,7 @@ require("dotenv").config();
 //     }
 // };
 
-exports.deleteSpareCable = async (req, res, next) => {
+exports.deleteSpareCable = async (req, res) => {
   try {
     console.log(req.params);
     await spareCableModel.deleteOne(req.params);
@@ -28,7 +28,7 @@ exports.deleteSpareCable = async (req, res, next) => {
   }
 };
 
-exports.editSpareCable = async (req, res, next) => {
+exports.editSpareCable = async (req, res) => {
   try {
     console.log(req.params);
     await spareCableModel.updateOne(req.params, { $set: req.body });
@@ -40,7 +40,7 @@ exports.editSpareCable = async (req, res, next) => {
   }
 };
 
-exports.getAll = (req, res, next) => {
+exports.getAll = (req, res) => {
   spareCableModel.find({}).exec(function (err, cables) {
     if (err) {
       res.send("error has occured");
@@ -51,7 +51,7 @@ exports.getAll = (req, res, next) => {
   });
 };
 
-exports.getPage = (req, res, next) => {
+exports.getPage = (req, res) => {
   const page = parseInt(req.params.page, 10);
   spareCableModel
     .find({})
@@ -67,7 +67,7 @@ exports.getPage = (req, res, next) => {
     });
 };
 
-exports.getCablePopulate = (req, res, next) => {
+exports.getCablePopulate = (req, res) => {
   spareCableModel
     .aggregate([
       {
@@ -163,7 +163,7 @@ exports.getCablePopulate = (req, res, next) => {
     });
 };
 
-exports.createSpareCable = async (req, res, next) => {
+exports.createSpareCable = async (req, res) => {
   const tank = req.body.tank;
   const tank_location = req.body.tank_location;
 
@@ -187,9 +187,9 @@ exports.createSpareCable = async (req, res, next) => {
   res.send(result);
 };
 
-exports.moveSpareCable = async (req, res, next) => {
+exports.moveSpareCable = async (req, res) => {
   const cableId = req.params;
-  const { toTank } = req.body;
+  let { toTank } = req.body;
 
   const cable = await spareCableModel.findOne({ _id: cableId });
 

@@ -1,10 +1,8 @@
-const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
-const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-exports.updateUser = async (req, res, next) => {
+exports.updateUser = async (req, res) => {
   const updatedUserData = req.body;
   User.findOne(
     {
@@ -40,7 +38,7 @@ exports.updateUser = async (req, res, next) => {
             User.updateOne(
               { _id: userId },
               { $set: updatedUserData },
-              (err, result) => {
+              (err) => {
                 if (err) {
                   return res.status(409).json({
                     message: "Email exists / Username exists",
@@ -61,7 +59,7 @@ exports.updateUser = async (req, res, next) => {
   );
 };
 
-exports.getUser = async (req, res, next) => {
+exports.getUser = async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);

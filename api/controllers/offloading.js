@@ -1,15 +1,16 @@
+/* eslint-disable no-undef */
 const loadingModel = require("../models/loading.models");
-const spareCableModel = require("../models/spare_cable.models");
 const submittedCableModel = require("../models/submitted_cable");
+const mongoose = require("mongoose");
 require("dotenv").config();
 
 //get all loading
-exports.getLoading = async (req, res, next) => {
+exports.getLoading = async (req, res) => {
   const loading = await loadingModel.find();
   res.send(loading);
 };
 
-exports.getLoadingById = async (req, res, next) => {
+exports.getLoadingById = async (req, res) => {
   const loadingId = req.params.loadingId;
   try {
     // find the loading document by id and populate the array cables_id field
@@ -29,7 +30,7 @@ exports.getLoadingById = async (req, res, next) => {
   }
 };
 
-// exports.offloadingExisting = async (req, res, next) => {
+// exports.offloadingExisting = async (req, res) => {
 //     const loadingId = req.params.loadingId;
 //     const cableId = req.params.cableId;
 //     const length = req.body.length;
@@ -90,9 +91,8 @@ exports.getLoadingById = async (req, res, next) => {
 //     }
 // };
 
-exports.addCableToOffloading = async (req, res, next) => {
+exports.addCableToOffloading = async (req, res) => {
   const { cables_id, length_returned } = req.body;
-  const loadingId = req.params.loadingId;
   if (cables_id > 0) {
     const isValidIds = comments.every((cables_id) =>
       mongoose.Types.ObjectId.isValid(cables_id)
@@ -136,7 +136,7 @@ exports.addCableToOffloading = async (req, res, next) => {
   }
 };
 
-exports.offloadingSubmittion = async (req, res, next) => {
+exports.offloadingSubmittion = async (req, res) => {
   try {
     const offloading = await loadingModel.findById(req.params.loadingId);
     if (!offloading) {
@@ -150,10 +150,6 @@ exports.offloadingSubmittion = async (req, res, next) => {
         message: "Offoading cables is empty!",
       });
     }
-    // move the cable from spare cable to submitted cable
-    const cables = await spareCableModel.find({
-      _id: { $in: loading.cables_id },
-    });
   } catch (error) {
     console.error(error);
     res.status(500).json({

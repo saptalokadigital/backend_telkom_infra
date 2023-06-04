@@ -20,7 +20,7 @@ exports.postSpareKit = (data) =>
       });
   });
 
-exports.deleteSpareKit = async (req, res, next) => {
+exports.deleteSpareKit = async (req, res) => {
   try {
     console.log(req.params);
     return res.status(200).send({ message: "Deleted spare kit succesfully" });
@@ -31,10 +31,10 @@ exports.deleteSpareKit = async (req, res, next) => {
   }
 };
 
-exports.editSpareKit = async (req, res, next) => {
+exports.editSpareKit = async (req, res) => {
   try {
     console.log(req.params);
-    let data = await spareKitModel.updateOne(req.params, { $set: req.body });
+    await spareKitModel.updateOne(req.params, { $set: req.body });
     return res.status(200).send({ message: "Updated spare kit succesfully" });
   } catch (error) {
     return res.status(500).send({
@@ -43,7 +43,7 @@ exports.editSpareKit = async (req, res, next) => {
   }
 };
 
-exports.getAll = (req, res, next) => {
+exports.getAll = (req, res) => {
   spareKitModel.find({}).exec(function (err, kits) {
     if (err) {
       res.send("error has occured");
@@ -54,7 +54,7 @@ exports.getAll = (req, res, next) => {
   });
 };
 
-exports.getPage = (req, res, next) => {
+exports.getPage = (req, res) => {
   const page = parseInt(req.params.page, 10);
   spareKitModel
     .find({})
@@ -70,7 +70,7 @@ exports.getPage = (req, res, next) => {
     });
 };
 
-exports.getKitPopulate = (req, res, next) => {
+exports.getKitPopulate = (req, res) => {
   spareKitModel
     .aggregate([
       {

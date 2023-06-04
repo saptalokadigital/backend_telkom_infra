@@ -1,9 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const newMaterialController = require("../controllers/newMaterial");
-const auth = require("../middleware/auth");
-const multer = require("multer");
-
 // const upload = multer({
 //   storage: multer.memoryStorage(),
 //   limits: {

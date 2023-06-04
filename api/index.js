@@ -1,10 +1,10 @@
 const express = require("express");
-const morgan = require("morgan");
 const app = express();
-const bodyParser = require("body-parser");
 const routes = require("./routes");
-const port = process.env.PORT || 1000;
+const port = process.env.MY_APP_PORT || 1000;
 const connectToDatabase = require("./database");
+require("dotenv").config();
+const functions = require("firebase-functions");
 
 const cors = require("cors");
 const logger = require("./logger");
@@ -16,7 +16,7 @@ async function startServer() {
 
   app.use("/api", routes);
 
-  app.use((err, req, res, next) => {
+  app.use((err, req, res) => {
     logger.error(err.stack);
     res.status(err.statusCode || 500).send({ error: err.message });
   });
@@ -25,4 +25,9 @@ async function startServer() {
     logger.info(`Server running at http://localhost:${port}/`);
   });
 }
-module.exports = startServer;
+
+// Menambahkan exports.api = functions
+exports.api = functions.https.onRequest(app);
+
+// Memanggil fungsi startServer
+startServer();

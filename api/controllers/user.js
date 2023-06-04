@@ -6,7 +6,7 @@ const dashCableModel = require("../models/spare_cable.models");
 require("dotenv").config();
 
 // Create new user or Sign ups
-exports.signUpNewUser = (req, res, next) => {
+exports.signUpNewUser = (req, res) => {
   User.find({
     $or: [{ email: req.body.email }, { username: req.body.username }],
   })
@@ -52,7 +52,7 @@ exports.signUpNewUser = (req, res, next) => {
     });
 };
 //User Login
-exports.userSignIn = (req, res, next) => {
+exports.userSignIn = (req, res) => {
   User.find({ username: req.body.username })
     .exec()
     .then((user) => {
@@ -102,7 +102,7 @@ exports.userSignIn = (req, res, next) => {
 };
 
 //Delete User
-exports.deleteUser = (req, res, next) => {
+exports.deleteUser = (req, res) => {
   User.remove({ _id: req.params.userId })
     .exec()
     .then((result) => {
@@ -119,7 +119,7 @@ exports.deleteUser = (req, res, next) => {
     });
 };
 
-exports.validate = (req, res, next) => {
+exports.validate = (req, res) => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -146,7 +146,7 @@ exports.validate = (req, res, next) => {
   }
 };
 
-exports.userProfile = async (req, res, next) => {
+exports.userProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
 
@@ -159,7 +159,7 @@ exports.userProfile = async (req, res, next) => {
   }
 };
 
-exports.getAll = (req, res, next) => {
+exports.getAll = (req, res) => {
   dashCableModel.find({}).exec(function (err, cables) {
     if (err) {
       res.send("error has occured");

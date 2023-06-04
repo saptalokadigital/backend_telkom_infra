@@ -1,11 +1,11 @@
+/* eslint-disable no-undef */
 const loadingModel = require("../models/loading.models");
 const spareCableModel = require("../models/spare_cable.models");
 const submittedCableModel = require("../models/submitted_cable");
 const submittedKitModel = require("../models/submitted_kit");
 const submittedTurnoverModel = require("../models/submitted_turnover");
 const spareKitModel = require("../models/spare_kits");
-const moment = require("moment-timezone");
-const fs = require("fs");
+const mongoose = require("mongoose");
 require("dotenv").config();
 
 function convertToRoman(num) {
@@ -32,7 +32,7 @@ function convertToRoman(num) {
   return num; // Jika angka tidak ada dalam rentang 1-12, kembalikan angka aslinya
 }
 
-exports.addCableToLoading = async (req, res, next) => {
+exports.addCableToLoading = async (req, res) => {
   const { cables_id, priceIdr, priceUsd } = req.body;
   if (cables_id > 0) {
     const isValidIds = comments.every((cables_id) =>
@@ -79,7 +79,7 @@ exports.addCableToLoading = async (req, res, next) => {
   }
 };
 
-exports.editCableInLoading = async (req, res, next) => {
+exports.editCableInLoading = async (req, res) => {
   const { cables_id } = req.body;
   if (cables_id > 0) {
     const isValidIds = comments.every((cables_id) =>
@@ -107,7 +107,7 @@ exports.editCableInLoading = async (req, res, next) => {
     });
   }
 };
-exports.editKitInLoading = async (req, res, next) => {
+exports.editKitInLoading = async (req, res) => {
   const { kits_id } = req.body;
   if (kits_id > 0) {
     const isValidIds = comments.every((kits_id) =>
@@ -136,7 +136,7 @@ exports.editKitInLoading = async (req, res, next) => {
   }
 };
 
-exports.removeCableFromLoading = async (req, res, next) => {
+exports.removeCableFromLoading = async (req, res) => {
   const { cables_id } = req.body;
   if (cables_id > 0) {
     const isValidIds = comments.every((cables_id) =>
@@ -176,7 +176,7 @@ exports.removeCableFromLoading = async (req, res, next) => {
   }
 };
 
-exports.addKitToLoading = async (req, res, next) => {
+exports.addKitToLoading = async (req, res) => {
   const { kits_id, unitPriceIdr, unitPriceUsd, qty } = req.body;
   if (kits_id > 0) {
     const isValidIds = comments.every((kits_id) =>
@@ -226,7 +226,7 @@ exports.addKitToLoading = async (req, res, next) => {
 };
 
 //delete kit from loading
-exports.removeKitFromLoading = async (req, res, next) => {
+exports.removeKitFromLoading = async (req, res) => {
   const { kits_id } = req.body;
   if (kits_id > 0) {
     const isValidIds = comments.every((kits_id) =>
@@ -264,7 +264,7 @@ exports.removeKitFromLoading = async (req, res, next) => {
   }
 };
 
-exports.deleteAllCableAndKitFromLoading = async (req, res, next) => {
+exports.deleteAllCableAndKitFromLoading = async (req, res) => {
   try {
     // search for the loading document by id
     const loading = await loadingModel.findById(req.params.loadingId);
@@ -285,7 +285,7 @@ exports.deleteAllCableAndKitFromLoading = async (req, res, next) => {
   }
 };
 
-exports.getLoadingById = async (req, res, next) => {
+exports.getLoadingById = async (req, res) => {
   const loadingId = req.params.loadingId;
   try {
     // find the loading document by id and populate the array cables_id field
@@ -350,7 +350,7 @@ exports.getLoadingById = async (req, res, next) => {
   }
 };
 
-exports.postLoading = async (req, res, next) => {
+exports.postLoading = async (req, res) => {
   let data = new loadingModel(req.body);
   //search all no_bast in loading,sort it and get the last one then add 1
 
@@ -409,13 +409,13 @@ exports.postLoading = async (req, res, next) => {
 };
 
 //get all loading
-exports.getLoading = async (req, res, next) => {
+exports.getLoading = async (req, res) => {
   const loading = await loadingModel.find();
   res.send(loading);
 };
 
 //delete loading
-exports.deleteLoading = async (req, res, next) => {
+exports.deleteLoading = async (req, res) => {
   try {
     const loading = await loadingModel.findByIdAndDelete(req.params._id);
     if (!loading) {
@@ -435,7 +435,7 @@ exports.deleteLoading = async (req, res, next) => {
   }
 };
 
-exports.getTurnoverByLoadingId = async (req, res, next) => {
+exports.getTurnoverByLoadingId = async (req, res) => {
   try {
     const loading = await loadingModel.findById(req.params.loadingId);
 
@@ -490,7 +490,7 @@ exports.getTurnoverByLoadingId = async (req, res, next) => {
   }
 };
 
-exports.loadingSubmittion = async (req, res, next) => {
+exports.loadingSubmittion = async (req, res) => {
   try {
     const loading = await loadingModel.findById(req.params.loadingId);
     if (!loading) {
@@ -626,10 +626,15 @@ exports.loadingSubmittion = async (req, res, next) => {
       message: "Loading submittion successfully!",
       loading: loading,
     });
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
 };
 
-exports.addEvidenceToLoading = async (req, res, next) => {
+exports.addEvidenceToLoading = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -666,7 +671,7 @@ exports.addEvidenceToLoading = async (req, res, next) => {
   }
 };
 
-exports.downloadFile = async (req, res, next) => {
+exports.downloadFile = async (req, res) => {
   try {
     const loading = await loadingModel.findById(req.params.loadingId);
     if (!loading) {

@@ -3,7 +3,7 @@ const CableType = require("../models/cable_type");
 const ArmoringType = require("../models/armoring_type");
 require("dotenv").config();
 
-exports.getChart = async (req, res, next) => {
+exports.getChart = async (req, res) => {
   spareCableModel
     .aggregate([
       //Group by cable type and armoring type
@@ -60,7 +60,7 @@ exports.getChart = async (req, res, next) => {
 };
 
 // get chart by cable type and armoring type
-exports.getChartByCableTypeAndArmoringType = async (req, res, next) => {
+exports.getChartByCableTypeAndArmoringType = async (req, res) => {
   spareCableModel
     .aggregate([
       //Group by cable type and armoring type
@@ -117,7 +117,7 @@ exports.getChartByCableTypeAndArmoringType = async (req, res, next) => {
     });
 };
 
-exports.getChartByCableType = async (req, res, next) => {
+exports.getChartByCableType = async (req, res) => {
   // Get all cable types
   const cableTypes = await CableType.find().exec();
 

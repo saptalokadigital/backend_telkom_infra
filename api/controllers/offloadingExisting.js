@@ -1,6 +1,8 @@
+/* eslint-disable no-undef */
 const loadingModel = require("../models/loading.models");
 const spareCableModel = require("../models/spare_cable.models");
 const submittedCableModel = require("../models/submitted_cable");
+const mongoose = require("mongoose");
 require("dotenv").config();
 function convertToRoman(num) {
   const romanNumerals = [
@@ -26,12 +28,12 @@ function convertToRoman(num) {
   return num; // Jika angka tidak ada dalam rentang 1-12, kembalikan angka aslinya
 }
 //get all loading
-exports.getLoading = async (req, res, next) => {
+exports.getLoading = async (req, res) => {
   const loading = await loadingModel.find();
   res.send(loading);
 };
 
-exports.getLoadingById = async (req, res, next) => {
+exports.getLoadingById = async (req, res) => {
   const loadingId = req.params.loadingId;
   try {
     // find the loading document by id and populate the array cables_id field
@@ -51,7 +53,7 @@ exports.getLoadingById = async (req, res, next) => {
   }
 };
 
-// exports.offloadingExisting = async (req, res, next) => {
+// exports.offloadingExisting = async (req, res) => {
 //     const loadingId = req.params.loadingId;
 //     const cableId = req.params.cableId;
 //     const length = req.body.length;
@@ -112,7 +114,7 @@ exports.getLoadingById = async (req, res, next) => {
 //     }
 // };
 
-exports.addCableToOffloading = async (req, res, next) => {
+exports.addCableToOffloading = async (req, res) => {
   const { cables_id, length_returned } = req.body;
   if (cables_id > 0) {
     const isValidIds = comments.every((cables_id) =>
@@ -164,7 +166,7 @@ exports.addCableToOffloading = async (req, res, next) => {
   }
 };
 
-exports.offloadingSubmittion = async (req, res, next) => {
+exports.offloadingSubmittion = async (req, res) => {
   const loading = await loadingModel.findById(req.params.loadingId);
   if (!loading) {
     return res.status(404).json({

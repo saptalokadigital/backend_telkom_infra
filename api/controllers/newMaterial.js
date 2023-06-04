@@ -28,7 +28,7 @@ function convertToRoman(num) {
   return num; // Jika angka tidak ada dalam rentang 1-12, kembalikan angka aslinya
 }
 
-exports.createLoadingNewMaterial = async (req, res, next) => {
+exports.createLoadingNewMaterial = async (req, res) => {
   let data = new offloadingNewMaterialModel(req.body);
   //search all no_bast in loading,sort it and get the last one then add 1
 
@@ -81,7 +81,7 @@ exports.createLoadingNewMaterial = async (req, res, next) => {
   res.status(201).json({ success: true, id: result._id, loading: result });
 };
 
-exports.getOffloadingNewMaterialById = async (req, res, next) => {
+exports.getOffloadingNewMaterialById = async (req, res) => {
   const offloadingId = req.params.offloadingId;
   try {
     const offloadingNewMaterial = await offloadingNewMaterialModel
@@ -122,7 +122,7 @@ exports.getOffloadingNewMaterialById = async (req, res, next) => {
   }
 };
 
-exports.addCableToOffloadingNewMaterial = async (req, res, next) => {
+exports.addCableToOffloadingNewMaterial = async (req, res) => {
   try {
     const offloadingId = req.params.offloadingId;
     let data = new cableNewMaterial(req.body);
@@ -146,7 +146,7 @@ exports.addCableToOffloadingNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.getAllOffloadingNewMaterial = async (req, res, next) => {
+exports.getAllOffloadingNewMaterial = async (req, res) => {
   try {
     const offloadingNewMaterial = await offloadingNewMaterialModel
       .find()
@@ -160,7 +160,7 @@ exports.getAllOffloadingNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.addKitToOffloadingNewMaterial = async (req, res, next) => {
+exports.addKitToOffloadingNewMaterial = async (req, res) => {
   try {
     const offloadingId = req.params.offloadingId;
     let data = new kitNewMaterial(req.body);
@@ -184,7 +184,7 @@ exports.addKitToOffloadingNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.removeCableFromOffloadingNewMaterial = async (req, res, next) => {
+exports.removeCableFromOffloadingNewMaterial = async (req, res) => {
   try {
     const offloadingId = req.params.offloadingId;
     const cableId = req.params.cableId;
@@ -211,7 +211,7 @@ exports.removeCableFromOffloadingNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.removeKitFromOffloadingNewMaterial = async (req, res, next) => {
+exports.removeKitFromOffloadingNewMaterial = async (req, res) => {
   try {
     const offloadingId = req.params.offloadingId;
     const kitId = req.params.kitId;
@@ -238,7 +238,7 @@ exports.removeKitFromOffloadingNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.offloadingNewMaterialSubmittion = async (req, res, next) => {
+exports.offloadingNewMaterialSubmittion = async (req, res) => {
   try {
     const offloadingId = req.params.offloadingId;
     const offloadingNewMaterial = await offloadingNewMaterialModel.findById(
@@ -298,7 +298,7 @@ exports.offloadingNewMaterialSubmittion = async (req, res, next) => {
       cableObj.tank_level = nextTankLevels.get(tank_location);
       const spareCable = new spareCableModel(cableObj);
       await spareCable.save();
-      await offloadingNewMaterial.submitted_new_material_kits_id_in_spare_kits.push(
+      offloadingNewMaterial.submitted_new_material_cables_id_in_spare_cable.push(
         spareCable._id
       );
     }
@@ -306,18 +306,16 @@ exports.offloadingNewMaterialSubmittion = async (req, res, next) => {
     const kits = await kitNewMaterial.find({
       _id: { $in: offloadingNewMaterial.new_material_kits },
     });
-
-    kits.map(async (kit) => {
+    for (const kit of kits) {
       const kitObj = kit.toObject();
       delete kitObj._id;
 
       const newKit = new spareKitModel(kitObj);
       await newKit.save();
-
-      await offloadingNewMaterial.submitted_new_material_kits_id_in_spare_kits.push(
+      offloadingNewMaterial.submitted_new_material_kits_id_in_spare_kits.push(
         newKit._id
       );
-    });
+    }
 
     offloadingNewMaterial.isSubmitted = true;
 
@@ -335,7 +333,7 @@ exports.offloadingNewMaterialSubmittion = async (req, res, next) => {
   }
 };
 
-exports.removeOffloadingById = async (req, res, next) => {
+exports.removeOffloadingById = async (req, res) => {
   try {
     const offloadingId = req.params.offloadingId;
     const offloading = await offloadingNewMaterialModel.findById(offloadingId);

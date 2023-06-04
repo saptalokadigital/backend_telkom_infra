@@ -5,7 +5,7 @@ const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-exports.postSpareCableNewMaterial = async (req, res, next) => {
+exports.postSpareCableNewMaterial = async (req, res) => {
   try {
     let data = new cableNewMaterial(req.body);
     const result = await data.save();
@@ -42,7 +42,7 @@ exports.postSpareCableNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.getCartCablesNewMaterial = async (req, res, next) => {
+exports.getCartCablesNewMaterial = async (req, res) => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -70,7 +70,7 @@ exports.getCartCablesNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.deleteCartCablesNewMaterial = async (req, res, next) => {
+exports.deleteCartCablesNewMaterial = async (req, res) => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -99,7 +99,7 @@ exports.deleteCartCablesNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.deleteAllCartCablesNewMaterial = async (req, res, next) => {
+exports.deleteAllCartCablesNewMaterial = async (req, res) => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -128,7 +128,7 @@ exports.deleteAllCartCablesNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.editCartCablesNewMaterial = async (req, res, next) => {
+exports.editCartCablesNewMaterial = async (req, res) => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -144,7 +144,7 @@ exports.editCartCablesNewMaterial = async (req, res, next) => {
           message: "Failed to authenticate token inside.",
         });
       const user = await User.findById(decoded.userId);
-      const cable = await cableNewMaterial.findById(req.params.id);
+      let cable = await cableNewMaterial.findById(req.params.id);
       if (!user.cartCableNewMaterial.includes(cable._id)) {
         return res.status(409).send({
           message: "Cable not in cart.",
@@ -163,7 +163,7 @@ exports.editCartCablesNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.submitCartCablesNewMaterial = async (req, res, next) => {
+exports.submitCartCablesNewMaterial = async (req, res) => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -245,7 +245,7 @@ exports.submitCartCablesNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.getAllSpareCableNewMaterial = async (req, res, next) => {
+exports.getAllSpareCableNewMaterial = async (req, res) => {
   try {
     const loading = await loadingNewMaterial.find();
     return res.status(200).send(loading);
@@ -256,7 +256,7 @@ exports.getAllSpareCableNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.getSpareCableNewMaterialById = async (req, res, next) => {
+exports.getSpareCableNewMaterialById = async (req, res) => {
   try {
     const loading = await loadingNewMaterial.findById(req.params._id);
     return res.status(200).send(loading);
@@ -267,7 +267,7 @@ exports.getSpareCableNewMaterialById = async (req, res, next) => {
   }
 };
 
-exports.uploadEvidenceSpareCableNewMaterial = async (req, res, next) => {
+exports.uploadEvidenceSpareCableNewMaterial = async (req, res) => {
   try {
     try {
       if (!req.file) {
@@ -310,7 +310,7 @@ exports.uploadEvidenceSpareCableNewMaterial = async (req, res, next) => {
   }
 };
 
-exports.downloadEvidenceSpareCableNewMaterial = async (req, res, next) => {
+exports.downloadEvidenceSpareCableNewMaterial = async (req, res) => {
   try {
     const loading = await loadingNewMaterial.findById(req.params.loadingId);
     if (!loading) {
