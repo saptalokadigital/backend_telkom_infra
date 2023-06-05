@@ -86,6 +86,9 @@ exports.getOffloadingNewMaterialById = async (req, res) => {
   try {
     const offloadingNewMaterial = await offloadingNewMaterialModel
       .findById(offloadingId)
+      .populate("diserahkan")
+      .populate("diketahui")
+      .populate("perusahaan")
       .populate("new_material_cables")
       .populate({
         path: "new_material_cables",
@@ -106,7 +109,12 @@ exports.getOffloadingNewMaterialById = async (req, res) => {
           path: "system cable_type manufacturer armoring_type core_type",
         },
       })
-      .populate("submitted_new_material_kits_id_in_spare_kits")
+      .populate({
+        path: "submitted_new_material_kits_id_in_spare_kits",
+        populate: { 
+          path: "system" 
+      }
+      })
       .populate({
         path: "new_material_kits",
         populate: {
