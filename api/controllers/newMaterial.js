@@ -113,7 +113,10 @@ exports.getOffloadingNewMaterialById = async (req, res) => {
           path: "system",
         },
       });
-    res.status(200).json([offloadingNewMaterial]);
+    res.status(200).json({
+      message: "Loading fetched successfully!",
+      newMaterial: [offloadingNewMaterial],
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
