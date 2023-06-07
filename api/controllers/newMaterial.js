@@ -111,9 +111,9 @@ exports.getOffloadingNewMaterialById = async (req, res) => {
       })
       .populate({
         path: "submitted_new_material_kits_id_in_spare_kits",
-        populate: { 
-          path: "system" 
-      }
+        populate: {
+          path: "system",
+        },
       })
       .populate({
         path: "new_material_kits",
@@ -359,6 +359,80 @@ exports.removeOffloadingById = async (req, res) => {
       success: true,
       message: "Offloading deleted successfully!",
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.addEvidenceToNewMaterial = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Please upload a file!",
+      });
+    }
+
+    const offloading = await offloadingNewMaterialModel.findById(
+      req.params.offloadingId
+    );
+    if (!offloading) {
+      return res.status(404).json({
+        message: "Offoading not found!",
+      });
+    }
+
+    const { buffer, mimetype, originalname } = req.file;
+    const file = {
+      data: buffer,
+      contentType: mimetype,
+      originalName: originalname,
+    };
+
+    offloading.evidence = file;
+    await offloading.save();
+
+    res.status(201).json({
+      message: "Evidence added successfully!",
+      offloading: offloading,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.downloadFile = async (req, res) => {
+  try {
+    const offloading = await offloadingNewMaterialModel.findById(
+      req.params.offloadingId
+    );
+    if (!offloading) {
+      return res.status(404).json({
+        message: "Offoading not found!",
+      });
+    }
+
+    const file = offloading.evidence;
+    if (!file) {
+      return res.status(404).json({
+        message: "File not found!",
+      });
+    }
+
+    // Set headers
+    res.setHeader("Content-Type", file.contentType);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${file.originalName}`
+    );
+
+    // Send buffer as response
+    res.send(file.data);
   } catch (error) {
     console.error(error);
     res.status(500).json({

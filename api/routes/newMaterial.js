@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const newMaterialController = require("../controllers/newMaterial");
-// const upload = multer({
-//   storage: multer.memoryStorage(),
-//   limits: {
-//     fileSize: 5 * 1024 * 1024, // 5MB
-//   },
-// });
+const multer = require("multer");
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
+  },
+});
 
 router.post("/create", newMaterialController.createLoadingNewMaterial);
 // router.post(
@@ -42,5 +44,12 @@ router.delete(
   "/delete/:offloadingId",
   newMaterialController.removeOffloadingById
 );
+router.post(
+  "/evidence/:offloadingId",
+  upload.single("evidence"),
+  newMaterialController.addEvidenceToNewMaterial
+);
+
+router.get("/evidence/:offloadingId", newMaterialController.downloadFile);
 
 module.exports = router;
