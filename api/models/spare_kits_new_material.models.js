@@ -23,6 +23,11 @@ const spareKitsNewMaterialSchema = new Schema(
     nomor_berita_acara: { type: String },
     unitPriceIdr: { type: Number },
     unitPriceUsd: { type: Number },
+    evidence: {
+      data: Buffer,
+      contentType: String,
+      originalName: String,
+    },
   },
   { versionKey: false }
 );

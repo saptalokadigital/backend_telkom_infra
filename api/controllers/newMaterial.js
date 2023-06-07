@@ -440,3 +440,141 @@ exports.downloadFile = async (req, res) => {
     });
   }
 };
+
+exports.addEvidenceToCableNewMaterial = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Please upload a file!",
+      });
+    }
+
+    const cable = await cableNewMaterial.findById(req.params.cableId);
+
+    const { buffer, mimetype, originalname } = req.file;
+    const file = {
+      data: buffer,
+      contentType: mimetype,
+      originalName: originalname,
+    };
+
+    cable.evidence = file;
+    await cable.save();
+
+    res.status(201).json({
+      message: "Evidence added successfully!",
+      cable: cable,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.addEvidenceToKitNewMaterial = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Please upload a file!",
+      });
+    }
+
+    const kit = await kitNewMaterial.findById(req.params.kitId);
+
+    const { buffer, mimetype, originalname } = req.file;
+    const file = {
+      data: buffer,
+      contentType: mimetype,
+      originalName: originalname,
+    };
+
+    kit.evidence = file;
+    await kit.save();
+
+    res.status(201).json({
+      message: "Evidence added successfully!",
+      kit: kit,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.downloadFileCable = async (req, res) => {
+  try {
+    const offloading = await offloadingNewMaterialModel.findById(
+      req.params.offloadingId
+    );
+    if (!offloading) {
+      return res.status(404).json({
+        message: "Offoading not found!",
+      });
+    }
+
+    const cable = await cableNewMaterial.findById(req.params.cableId);
+
+    const file = cable.evidence;
+    if (!file) {
+      return res.status(404).json({
+        message: "File not found!",
+      });
+    }
+
+    // Set headers
+    res.setHeader("Content-Type", file.contentType);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${file.originalName}`
+    );
+
+    // Send buffer as response
+    res.send(file.data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.downloadFileKit = async (req, res) => {
+  try {
+    const offloading = await offloadingNewMaterialModel.findById(
+      req.params.offloadingId
+    );
+    if (!offloading) {
+      return res.status(404).json({
+        message: "Offloading not found!",
+      });
+    }
+
+    const kit = await kitNewMaterial.findById(req.params.kitId);
+
+    const file = kit.evidence;
+    if (!file) {
+      return res.status(404).json({
+        message: "File not found!",
+      });
+    }
+
+    // Set headers
+    res.setHeader("Content-Type", file.contentType);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${file.originalName}`
+    );
+
+    // Send buffer as response
+    res.send(file.data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: `Something went wrong! ${error}`,
+    });
+  }
+};

@@ -22,10 +22,12 @@ router.get(
 );
 router.post(
   "/addCable/:offloadingId",
+  upload.single("evidence"),
   newMaterialController.addCableToOffloadingNewMaterial
 );
 router.post(
   "/addKit/:offloadingId",
+  upload.single("evidence"),
   newMaterialController.addKitToOffloadingNewMaterial
 );
 router.delete(
@@ -51,5 +53,27 @@ router.post(
 );
 
 router.get("/evidence/:offloadingId", newMaterialController.downloadFile);
+
+router.post(
+  "/evidence/cable/:offloadingId/:cableId",
+  upload.single("evidence"),
+  newMaterialController.addEvidenceToCableNewMaterial
+);
+
+router.post(
+  "/evidence/kit/:offloadingId/:kitId",
+  upload.single("evidence"),
+  newMaterialController.addEvidenceToKitNewMaterial
+);
+
+router.get(
+  "/evidence/cable/:offloadingId/:cableId",
+  newMaterialController.downloadFileCable
+);
+
+router.get(
+  "/evidence/kit/:offloadingId/:kitId",
+  newMaterialController.downloadFileKit
+);
 
 module.exports = router;

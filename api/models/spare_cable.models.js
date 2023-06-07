@@ -48,7 +48,9 @@ const spareCableSchema = new Schema(
       type: String,
     },
     evidence: {
-      type: String,
+      data: Buffer,
+      contentType: String,
+      originalName: String,
     },
     sigma_core: {
       type: Number,
