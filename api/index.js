@@ -27,7 +27,7 @@ async function startServer() {
 }
 
 // Menambahkan exports.api = functions
-exports.api = functions.https.onRequest(app);
+exports.api = functions.region("asia-southeast2").https.onRequest(app);
 
 // Memanggil fungsi startServer
 startServer();
