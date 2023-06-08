@@ -146,9 +146,11 @@ exports.addCableToOffloadingNewMaterial = async (req, res) => {
 
     await offloadingNewMaterial.save();
 
-    res
-      .status(201)
-      .json({ success: true, offloadingNewMaterial: offloadingNewMaterial });
+    res.status(201).json({
+      success: true,
+      offloadingNewMaterial: offloadingNewMaterial,
+      newCableId: result._id,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -184,9 +186,11 @@ exports.addKitToOffloadingNewMaterial = async (req, res) => {
 
     await offloadingNewMaterial.save();
 
-    res
-      .status(201)
-      .json({ success: true, offloadingNewMaterial: offloadingNewMaterial });
+    res.status(201).json({
+      success: true,
+      offloadingNewMaterial: offloadingNewMaterial,
+      newKitId: result._id,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
