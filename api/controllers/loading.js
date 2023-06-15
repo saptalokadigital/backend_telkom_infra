@@ -358,7 +358,26 @@ exports.getLoadingById = async (req, res) => {
         populate: {
           path: "system cable_type manufacturer armoring_type core_type",
         },
+      })
+      .populate({
+        path: "existing_kits_id",
+        populate: {
+          path: "kit",
+        },
+      })
+      .populate({
+        path: "existing_kits_id.kit",
+        populate: {
+          path: "system",
+        },
+      })
+      .populate({
+        path: "submitted_existing_kits_id",
+        populate: {
+          path: "system",
+        },
       });
+
     res.status(200).json({
       message: "Loading fetched successfully!",
       loading: [loading],
