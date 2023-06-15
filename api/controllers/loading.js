@@ -186,17 +186,30 @@ exports.addKitToLoading = async (req, res) => {
       return res.status(400).json({ error: "Invalid comment IDs" });
     }
   }
+
   try {
+    //check length should be greater than 0
+    if (qty <= 0) {
+      return res.status(400).json({
+        message: "Qty should be greater than 0!",
+      });
+    }
     // search for the loading document by id
     const loading = await loadingModel.findById(req.params.loadingId);
     // add the new kit id to the array
     // check if the kit id is already in the array
     if (
-      loading.kits_id.some((kit) => kit._id.toString() === kits_id.toString())
+      loading.kits_id.some((kit) => kit.kit.toString() === kits_id.toString())
     ) {
       return res.status(400).json({
         message: "Kits already added to the loading!",
         loading: loading,
+      });
+    }
+    // check if the kit is not in the stock
+    if (!(await spareKitModel.findById(kits_id))) {
+      return res.status(400).json({
+        message: "Kits is not in the stock!",
       });
     }
     let kit = await spareKitModel.findById(kits_id);
@@ -204,13 +217,14 @@ exports.addKitToLoading = async (req, res) => {
     if (kit.qty < qty) {
       return res.status(400).json({
         message: "Qty pada kit tidak cukup!",
-        loading: loading,
+        qty_ready: kit.qty,
+        qty_request: qty,
       });
     }
     kit.unitPriceIdr = unitPriceIdr;
     kit.unitPriceUsd = unitPriceUsd;
     await kit.save();
-    loading.kits_id.push(kits_id);
+    loading.kits_id.push({ kit: kits_id, qty: qty });
     // save loading in the database
     await loading.save();
     res.status(201).json({
@@ -225,33 +239,34 @@ exports.addKitToLoading = async (req, res) => {
   }
 };
 
-//delete kit from loading
 exports.removeKitFromLoading = async (req, res) => {
   const { kits_id } = req.body;
-  if (kits_id > 0) {
-    const isValidIds = comments.every((kits_id) =>
-      mongoose.Types.ObjectId.isValid(kits_id)
-    );
-    if (!isValidIds) {
-      return res.status(400).json({ error: "Invalid comment IDs" });
-    }
-  }
-  try {
-    // search for the loading document by id
-    const loading = await loadingModel.findById(req.params.loadingId);
-    // remove the kit id from the array
-    // check if the kit id is not in the array
 
-    if (
-      !loading.kits_id.some((kit) => kit._id.toString() === kits_id.toString())
-    ) {
+  if (!mongoose.Types.ObjectId.isValid(kits_id)) {
+    return res.status(400).json({ error: "Invalid kit ID" });
+  }
+
+  try {
+    // Cari dokumen loading berdasarkan ID
+    const loading = await loadingModel.findById(req.params.loadingId);
+
+    // Periksa apakah kit ID ada dalam array kits_id
+    const kitIndex = loading.kits_id.findIndex(
+      (kit) => kit.kit.toString() === kits_id.toString()
+    );
+
+    if (kitIndex === -1) {
       return res.status(400).json({
-        message: "Kits is not in the loading!",
+        message: "Kit is not in the loading!",
       });
     }
-    loading.kits_id.pull(kits_id);
-    // save loading in the database
+
+    // Hapus kit dari array kits_id
+    loading.kits_id.splice(kitIndex, 1);
+
+    // Simpan perubahan pada objek loading
     await loading.save();
+
     res.status(201).json({
       message: "Kit removed successfully!",
       loading: loading,
@@ -304,6 +319,12 @@ exports.getLoadingById = async (req, res) => {
       .populate("kits_id")
       .populate({
         path: "kits_id",
+        populate: {
+          path: "kit",
+        },
+      })
+      .populate({
+        path: "kits_id.kit",
         populate: {
           path: "system",
         },
@@ -498,80 +519,131 @@ exports.loadingSubmittion = async (req, res) => {
         message: "Loading not found!",
       });
     }
-
-    //check if loading is empty
-    if (loading.cables_id.length === 0) {
+    if (loading.submitted_date_loading != null) {
       return res.status(400).json({
-        message: "Loading cables is empty!",
+        message: "Loading already submitted!",
       });
     }
-    // move the cable from spare cable to submitted cable
-    const cables = await spareCableModel.find({
-      _id: { $in: loading.cables_id },
-    });
+    //check if loading is empty
+    if (loading.cables_id.length === 0 && loading.kits_id.length === 0) {
+      return res.status(400).json({
+        message: "Loading cables and kits is empty!",
+      });
+    }
 
-    const turnOver = await Promise.all(
-      cables.map(async (cable) => {
-        return await spareCableModel
-          .find({
-            tank: cable.tank,
-            tank_location: cable.tank_location,
-            tank_level: { $gt: cable.tank_level },
-          })
-          .sort({ tank_level: -1 });
-      })
-    );
+    if (loading.cables_id.length !== 0) {
+      // move the cable from spare cable to submitted cable
+      const cables = await spareCableModel.find({
+        _id: { $in: loading.cables_id },
+      });
 
-    const uniqueTurnOver = turnOver.flat().reduce((acc, cable) => {
-      if (!cables.some((c) => c.id === cable.id)) {
-        if (!acc.some((uniqueCable) => uniqueCable.id === cable.id)) {
-          acc.push(cable);
-        }
-      }
-      return acc;
-    }, []);
-    // loop for every cable in turnOver and push it to submitted_turnover model
-    await Promise.all(
-      uniqueTurnOver.map(async (cable) => {
-        const cableObj = cable.toObject();
-        delete cableObj._id;
-        const submittedTurnOver = new submittedTurnoverModel(cableObj);
+      const turnOver = await Promise.all(
+        cables.map(async (cable) => {
+          return await spareCableModel
+            .find({
+              tank: cable.tank,
+              tank_location: cable.tank_location,
+              tank_level: { $gt: cable.tank_level },
+            })
+            .sort({ tank_level: -1 });
+        })
+      );
 
-        await submittedTurnOver.save();
-        //add submitted turnover id to submitted_turnover
-        loading.submitted_cables_turnover.push(submittedTurnOver);
-      })
-    );
-
-    await Promise.all(
-      turnOver.flat().map(async (cable) => {
-        //update cable tank level
-        await spareCableModel.updateOne(
-          { _id: cable._id },
-          {
-            $set: {
-              tank_level: cable.tank_level - 1,
-            },
+      const uniqueTurnOver = turnOver.flat().reduce((acc, cable) => {
+        if (!cables.some((c) => c.id === cable.id)) {
+          if (!acc.some((uniqueCable) => uniqueCable.id === cable.id)) {
+            acc.push(cable);
           }
-        );
-      })
-    );
+        }
+        return acc;
+      }, []);
+      // loop for every cable in turnOver and push it to submitted_turnover model
+      await Promise.all(
+        uniqueTurnOver.map(async (cable) => {
+          const cableObj = cable.toObject();
+          delete cableObj._id;
+          const submittedTurnOver = new submittedTurnoverModel(cableObj);
 
-    // loop for every cable in cables
-    await Promise.all(
-      cables.map(async (cable) => {
-        const cableObj = cable.toObject();
-        delete cableObj._id;
-        const submittedCable = new submittedCableModel(cableObj);
-        // save submitted cable in the database
-        await submittedCable.save();
+          await submittedTurnOver.save();
+          //add submitted turnover id to submitted_turnover
+          loading.submitted_cables_turnover.push(submittedTurnOver);
+        })
+      );
 
-        //delete cable from spare cable
-        await spareCableModel.findByIdAndDelete(cable._id);
-        // add submitted cable to submitted_cables
-        loading.submitted_cables.push(submittedCable);
-      })
-    );
+      await Promise.all(
+        turnOver.flat().map(async (cable) => {
+          //update cable tank level
+          await spareCableModel.updateOne(
+            { _id: cable._id },
+            {
+              $set: {
+                tank_level: cable.tank_level - 1,
+              },
+            }
+          );
+        })
+      );
+
+      // loop for every cable in cables
+      await Promise.all(
+        cables.map(async (cable) => {
+          const cableObj = cable.toObject();
+          delete cableObj._id;
+          const submittedCable = new submittedCableModel(cableObj);
+          // save submitted cable in the database
+          await submittedCable.save();
+
+          //delete cable from spare cable
+          await spareCableModel.findByIdAndDelete(cable._id);
+          // add submitted cable to submitted_cables
+          loading.submitted_cables.push(submittedCable);
+        })
+      );
+    }
+
+    if (loading.kits_id.length !== 0) {
+      // move the kit from spare kit to submitted kit
+      const kits = await spareKitModel.find({
+        _id: { $in: loading.kits_id.map((kit) => kit.kit) }, // Menggunakan kit.kit sebagai kriteria pencarian
+      });
+      // loop for every kit in kits
+      await Promise.all(
+        kits.map(async (kit) => {
+          const kitObj = kit.toObject();
+          const qtyTaken = loading.kits_id.find(
+            (c) => c.kit.toString() === kit._id.toString()
+          ).qty;
+          const kitQty = kitObj.qty;
+          kitObj.qty_taken = qtyTaken;
+
+          delete kitObj._id;
+
+          // create new submitted kit
+          const submittedKit = new submittedKitModel(kitObj);
+          // save submitted kit in the database
+
+          await submittedKit.save();
+          // delete cable from spare cable
+          if (qtyTaken < kitQty) {
+            // subtract length_taken from cable length
+            kit.qty = kitQty - qtyTaken;
+            // update cable length in the database
+            await spareKitModel.findByIdAndUpdate(kit._id, {
+              qty: kit.qty,
+            });
+          } else if (qtyTaken === kitQty) {
+            // delete cable from spare cable
+            await spareKitModel.findByIdAndDelete(kit._id);
+          } else {
+            // return error message
+            return res.status(400).json({ message: "Invalid qty taken" });
+          }
+          // add submitted kit to submitted_kits
+          loading.submitted_kits.push(submittedKit);
+        })
+      );
+    }
+
     // take get now and then push to loading
     // Buat objek Date saat ini
     const now = new Date();
@@ -594,27 +666,6 @@ exports.loadingSubmittion = async (req, res) => {
 
     // Simpan dalam loading.submitted_date_loading
     loading.submitted_date_loading = formattedDate;
-
-    await loading.save();
-    // move the kit from spare kit to submitted kit
-    const kits = await spareKitModel.find({
-      _id: { $in: loading.kits_id },
-    });
-    // loop for every kit in kits
-    await Promise.all(
-      kits.map(async (kit) => {
-        const kitObj = kit.toObject();
-        delete kitObj._id;
-        // create new submitted kit
-        const submittedKit = new submittedKitModel(kitObj);
-        // save submitted kit in the database
-        await submittedKit.save();
-        // delete kit from spare kit
-        await spareKitModel.findByIdAndDelete(kit._id);
-        // add submitted kit to submitted_kits
-        loading.submitted_kits.push(submittedKit);
-      })
-    );
 
     // remove the cable and kit id from the array
     loading.cables_id = [];

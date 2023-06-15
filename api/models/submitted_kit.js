@@ -24,6 +24,7 @@ const submittedKitsSchema = new Schema({
   is_offloaded: { type: Boolean, default: false },
   unitPriceIdr: { type: Number },
   unitPriceUsd: { type: Number },
+  qty_taken: { type: Number },
 });
 
 submittedKitsSchema.set("toJSON", {
