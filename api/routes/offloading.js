@@ -13,6 +13,18 @@ router.post(
   "/addCableExisting/:loadingId",
   offloadingController.addCableToOffloading
 );
+router.delete(
+  "/removeCableExisting/:loadingId",
+  offloadingController.removeCableFromOffloading
+);
+router.post(
+  "/addKitExisting/:loadingId",
+  offloadingController.addKitToOffloading
+);
+router.delete(
+  "/removeKitExisting/:loadingId",
+  offloadingController.removeKitFromOffloading
+);
 router.post(
   "/submitExisting/:loadingId",
   offloadingController.offloadingSubmittion

@@ -23,8 +23,17 @@ const loadingSchema = mongoose.Schema({
   existing_cables_id: [
     { type: mongoose.Schema.Types.ObjectId, ref: "submitted_cable" },
   ],
+  existing_kits_id: [
+    {
+      kit: { type: mongoose.Schema.Types.ObjectId, ref: "submitted_kit" },
+      qty: { type: Number },
+    },
+  ],
   submitted_existing_cables_id: [
     { type: mongoose.Schema.Types.ObjectId, ref: "spare_cable" },
+  ],
+  submitted_existing_kits_id: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "spare_kit" },
   ],
   project_name: { type: String, require: true },
   vessel_name: { type: String, require: true },

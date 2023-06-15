@@ -2,6 +2,8 @@
 const loadingModel = require("../models/loading.models");
 const spareCableModel = require("../models/spare_cable.models");
 const submittedCableModel = require("../models/submitted_cable");
+const submittedKitModel = require("../models/submitted_kit");
+const spareKitModel = require("../models/spare_kits");
 const mongoose = require("mongoose");
 require("dotenv").config();
 function convertToRoman(num) {
@@ -166,6 +168,145 @@ exports.addCableToOffloading = async (req, res) => {
   }
 };
 
+exports.removeCableFromOffloading = async (req, res) => {
+  const { cables_id } = req.body;
+  try {
+    // search for the loading document by id
+    const offloading = await loadingModel.findById(req.params.loadingId);
+    // check if the offloading is not submitted
+    if (offloading.submitted_date_offloading != null) {
+      return res.status(400).json({
+        message: "Offloading already submitted!",
+        submitted_date_offloading: offloading.submitted_date_offloading,
+      });
+    }
+    // check if the cable id is already in the array
+    if (
+      !offloading.existing_cables_id.some(
+        (cable) => cable._id.toString() === cables_id.toString()
+      )
+    ) {
+      return res.status(400).json({
+        message: "Cable not found in the offloading!",
+        loading: offloading,
+      });
+    }
+
+    // remove the cable id from the array
+    offloading.existing_cables_id = offloading.existing_cables_id.filter(
+      (cable) => cable._id.toString() !== cables_id.toString()
+    );
+    // save loading in the database
+    await offloading.save();
+    res.status(201).json({
+      message: "Cable removed successfully!",
+      offloading: offloading,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.addKitToOffloading = async (req, res) => {
+  const { kits_id, qty } = req.body;
+
+  try {
+    // search for the loading document by id
+    const offloading = await loadingModel.findById(req.params.loadingId);
+    // add the new kit id to the array
+    // check if the kit id is already in the array
+    if (
+      offloading.existing_kits_id.some(
+        (kit) => kit.kit.toString() === kits_id.toString()
+      )
+    ) {
+      return res.status(400).json({
+        message: "Kit already added to the offloading!",
+        loading: offloading,
+      });
+    }
+
+    // check qty is more than 0
+    if (qty <= 0) {
+      return res.status(400).json({
+        message: "Qty must be more than 0!",
+        loading: offloading,
+      });
+    }
+
+    // search for the kit document by id
+    const submittedKit = await submittedKitModel.findById(kits_id);
+
+    // check if qty is more than kit qty
+    if (qty > submittedKit.qty) {
+      return res.status(400).json({
+        message: "Qty is more than kit qty!",
+        qty: qty,
+        kit_qty: submittedKit.qty,
+      });
+    }
+
+    // add the kit id to the array
+    offloading.existing_kits_id.push({ kit: kits_id, qty: qty });
+    // save loading in the database
+    await offloading.save();
+    res.status(201).json({
+      message: "Kit added successfully!",
+      offloading: offloading,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
+exports.removeKitFromOffloading = async (req, res) => {
+  const { kits_id } = req.body;
+  try {
+    // search for the loading document by id
+    const offloading = await loadingModel.findById(req.params.loadingId);
+    // check if the offloading is not submitted
+    if (offloading.submitted_date_offloading != null) {
+      return res.status(400).json({
+        message: "Offloading already submitted!",
+        submitted_date_offloading: offloading.submitted_date_offloading,
+      });
+    }
+    // check if the kit id is already in the array
+    if (
+      !offloading.existing_kits_id.some(
+        (kit) => kit.kit.toString() === kits_id.toString()
+      )
+    ) {
+      return res.status(400).json({
+        message: "Kit not found in the offloading!",
+        loading: offloading,
+      });
+    }
+
+    // remove the kit id from the array
+    offloading.existing_kits_id = offloading.existing_kits_id.filter(
+      (kit) => kit.kit.toString() !== kits_id.toString()
+    );
+    // save loading in the database
+    await offloading.save();
+    res.status(201).json({
+      message: "Kit removed successfully!",
+      offloading: offloading,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Something went wrong!",
+    });
+  }
+};
+
 exports.offloadingSubmittion = async (req, res) => {
   const loading = await loadingModel.findById(req.params.loadingId);
   if (!loading) {
@@ -175,47 +316,86 @@ exports.offloadingSubmittion = async (req, res) => {
   }
 
   //check if loading is empty
-  if (loading.existing_cables_id.length === 0) {
+  if (
+    loading.existing_cables_id.length === 0 &&
+    loading.existing_kits_id.length === 0
+  ) {
     return res.status(400).json({
       message: "Offloading existing is empty!",
     });
   }
 
-  // move the cable from existing to submitted existing cable
-  const cables = await submittedCableModel.find({
-    _id: { $in: loading.existing_cables_id },
-  });
+  // check if the offloading is not submitted
+  if (loading.submitted_date_offloading != null) {
+    return res.status(400).json({
+      message: "Offloading already submitted!",
+      submitted_date_offloading: loading.submitted_date_offloading,
+    });
+  }
 
-  // loop for every cable in cables
-  await Promise.all(
-    cables.map(async (cable) => {
-      const cableObj = cable.toObject();
-      delete cableObj._id;
+  if (loading.existing_cables_id.length > 0) {
+    // move the cable from existing to submitted existing cable
+    const cables = await submittedCableModel.find({
+      _id: { $in: loading.existing_cables_id },
+    });
 
-      const spareCable = new spareCableModel(cableObj);
-      spareCable.length_report = cable.length_returned;
-      spareCable.length_meas = null;
-      // check maximum tank level at the same tank and tank_location
-      const highestCableInTank = await spareCableModel
-        .find({
-          tank_location: cable.tank_location,
-          tank: cable.tank,
-        })
-        .sort({ tank_level: -1 })
-        .limit(1);
-      let highest_tank = 0;
-      if (highestCableInTank.length > 0) {
-        highest_tank = highestCableInTank[0].tank_level;
-      }
+    // loop for every cable in cables
+    await Promise.all(
+      cables.map(async (cable) => {
+        const cableObj = cable.toObject();
+        delete cableObj._id;
 
-      spareCable.tank_level = highest_tank + 1;
-      // save spare cable in the database
-      await spareCable.save();
-      cable.is_offloaded = true;
-      // add submitted cable to submitted_cables
-      loading.submitted_existing_cables_id.push(spareCable);
-    })
-  );
+        const spareCable = new spareCableModel(cableObj);
+        spareCable.length_report = cable.length_returned;
+        spareCable.length_meas = null;
+        // check maximum tank level at the same tank and tank_location
+        const highestCableInTank = await spareCableModel
+          .find({
+            tank_location: cable.tank_location,
+            tank: cable.tank,
+          })
+          .sort({ tank_level: -1 })
+          .limit(1);
+        let highest_tank = 0;
+        if (highestCableInTank.length > 0) {
+          highest_tank = highestCableInTank[0].tank_level;
+        }
+
+        spareCable.tank_level = highest_tank + 1;
+        // save spare cable in the database
+        await spareCable.save();
+        cable.is_offloaded = true;
+        // add submitted cable to submitted_cables
+        loading.submitted_existing_cables_id.push(spareCable);
+      })
+    );
+  }
+
+  if (loading.existing_kits_id.length > 0) {
+    // move the kit from existing to submitted existing kit
+    const kits = await submittedKitModel.find({
+      _id: { $in: loading.existing_kits_id.map((kit) => kit.kit) }, // Menggunakan kit.kit sebagai kriteria pencarian
+    });
+
+    // loop for every kit in kits
+    await Promise.all(
+      kits.map(async (kit) => {
+        const kitObj = kit.toObject();
+        delete kitObj._id;
+
+        const spareKit = new spareKitModel(kitObj);
+        const qtyReturned = loading.existing_kits_id.find(
+          (c) => c.kit.toString() === kit._id.toString()
+        ).qty;
+        spareKit.qty = qtyReturned;
+
+        // save spare kit in the database
+        await spareKit.save();
+        // add submitted kit to submitted_kits
+        loading.submitted_existing_kits_id.push(spareKit);
+      })
+    );
+  }
 
   // take get now and then push to loading
   // Buat objek Date saat ini
