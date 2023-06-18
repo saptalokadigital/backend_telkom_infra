@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const uniqueValidator = require("mongoose-unique-validator");
+const spareCableModel = require("./spare_cable.models");
 
 const cableNewMaterialSchema = new Schema({
   no: {
@@ -69,6 +70,48 @@ const cableNewMaterialSchema = new Schema({
   E_core: {
     type: Number,
   },
+});
+
+cableNewMaterialSchema.pre("save", async function (next) {
+  try {
+    const system = await mongoose.model("System").findById(this.system);
+    const armoringType = await mongoose
+      .model("armoring_type")
+      .findById(this.armoring_type);
+
+    if (system && armoringType) {
+      const baseLabelId = parseInt(
+        `${system.label_id}0${armoringType.label_id}`
+      );
+
+      let labelId = baseLabelId;
+      let counter = 0;
+
+      while (true) {
+        const existingRecord = await spareCableModel.findOne({
+          label_id: labelId,
+        });
+
+        if (!existingRecord) {
+          if (counter === 0) {
+            // Mengatur nilai awal dengan format "180301"
+            const initialLabelId = parseInt(`${baseLabelId}01`);
+            this.label_id = initialLabelId;
+          } else {
+            this.label_id = labelId;
+          }
+          break;
+        }
+
+        counter++;
+        labelId = baseLabelId * 100 + counter;
+      }
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 cableNewMaterialSchema.set("toJSON", {
