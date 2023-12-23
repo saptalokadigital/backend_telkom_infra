@@ -86,6 +86,8 @@ exports.getOffloadingNewMaterialById = async (req, res) => {
   try {
     const offloadingNewMaterial = await offloadingNewMaterialModel
       .findById(offloadingId)
+      .populate("_id")
+      .populate("status")
       .populate("diserahkan")
       .populate("diketahui")
       .populate("perusahaan")
@@ -333,6 +335,8 @@ exports.offloadingNewMaterialSubmittion = async (req, res) => {
     }
 
     offloadingNewMaterial.isSubmitted = true;
+    offloadingNewMaterial.status = "Requested";
+    offloadingNewMaterial.date = new Date().toISOString()
 
     await offloadingNewMaterial.save();
 
@@ -582,3 +586,21 @@ exports.downloadFileKit = async (req, res) => {
     });
   }
 };
+
+exports.approveNewMaterial = async (req,res)=>{
+  try{
+    const {id} = req.params
+    const {status} = req.body
+    await offloadingNewMaterialModel.updateOne({_id:id},{$set:{status:status,date:new Date().toISOString()}})
+    const data = await offloadingNewMaterialModel.findOne({_id:id})
+    res.status(200).json({
+      message: "Update new material status successfully!",
+      data
+    });
+
+  }catch(err){
+    res.status(500).json({
+      message : err.message
+    })
+  }
+}

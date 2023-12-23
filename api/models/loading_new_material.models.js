@@ -33,6 +33,8 @@ const offLoadingNewMaterialSchema = mongoose.Schema({
   month: { type: String },
   year: { type: String },
   isSubmitted: { type: Boolean, default: false },
+  status: {type: String},
+  date:{type:Date}
 });
 
 module.exports = mongoose.model(

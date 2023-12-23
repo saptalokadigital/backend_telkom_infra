@@ -306,6 +306,7 @@ exports.getLoadingById = async (req, res) => {
     // find the loading document by id and populate the array cables_id field
     const loading = await loadingModel
       .findById(loadingId)
+      .populate("status_loading")
       .populate("diserahkan")
       .populate("diketahui")
       .populate("perusahaan")
@@ -689,6 +690,8 @@ exports.loadingSubmittion = async (req, res) => {
     // remove the cable and kit id from the array
     loading.cables_id = [];
     loading.kits_id = [];
+    loading.status_loading = "Requested"
+    loading.date_loading = new Date().toISOString()
     // save loading in the database
 
     await loading.save();
@@ -773,3 +776,22 @@ exports.downloadFile = async (req, res) => {
     });
   }
 };
+
+
+exports.approveLoading = async (req,res)=>{
+  try{
+    const {id} = req.params
+    const {status} = req.body
+    await loadingModel.updateOne({_id:id},{$set:{status:status,date_loading:new Date().toISOString()}})
+    const data = await loadingModel.findOne({_id:id})
+    res.status(200).json({
+      message: "Update loading status successfully!",
+      data
+    });
+
+  }catch(err){
+    res.status(500).json({
+      message : err.message
+    })
+  }
+}

@@ -41,7 +41,8 @@ exports.getLoadingById = async (req, res) => {
     // find the loading document by id and populate the array cables_id field
     const loading = await loadingModel
       .findById(loadingId)
-      .populate("cables_id");
+      .populate("cables_id")
+      .populate("status_offloading_existing");
 
     res.status(200).json({
       message: "Loading fetched successfully!",
@@ -459,6 +460,8 @@ exports.offloadingSubmittion = async (req, res) => {
 
   // Simpan dalam loading.submitted_date_loading
   loading.submitted_date_offloading = formattedDate;
+  loading.status_offloading_existing = "Requested"
+  loading.date_offloading_existing = new Date().toISOString()
 
   await loading.save();
 
@@ -467,3 +470,22 @@ exports.offloadingSubmittion = async (req, res) => {
     loading: loading,
   });
 };
+
+exports.approveOffloadingExisting = async (req,res)=>{
+   try{
+    const {id} = req.params
+    const {status} = req.body
+    await loadingModel.updateOne({_id:id},{$set:{status,date_offloading_existing:new Date().toISOString()}})
+    const data = await loadingModel.findOne({_id:id})
+    res.status(200).json({
+      message: "Update offloading existing material status successfully!",
+      data
+    })
+
+
+   }catch(err){
+    res.status(500).json({
+      message: err.message
+    })
+   }
+}

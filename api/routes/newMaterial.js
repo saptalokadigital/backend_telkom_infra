@@ -76,4 +76,6 @@ router.get(
   newMaterialController.downloadFileKit
 );
 
+router.post("/status/:id",newMaterialController.approveNewMaterial)
+
 module.exports = router;

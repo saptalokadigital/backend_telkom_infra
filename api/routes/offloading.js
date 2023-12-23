@@ -30,4 +30,9 @@ router.post(
   offloadingController.offloadingSubmittion
 );
 
+router.post(
+  "/statusExisting/:id",
+  offloadingController.approveOffloadingExisting
+);
+
 module.exports = router;
