@@ -445,6 +445,12 @@ exports.postLoading = async (req, res) => {
   data.no_bast = `${data.first_digit_bast}/BAST_Loading/${romanMonth}/${year}`;
   data.no_invoice = `${data.first_digit_invoice}/TI/${romanMonth}/${year}`;
 
+  data.status_offloading_existing = "Requested"
+  data.date_offloading_existing = new Date().toISOString()
+  
+  data.status_loading = "Requested"
+  data.date_loading = new Date().toISOString()
+
   const result = await data.save();
   res.status(201).json({ success: true, id: result._id, loading: result });
 };
@@ -690,8 +696,7 @@ exports.loadingSubmittion = async (req, res) => {
     // remove the cable and kit id from the array
     loading.cables_id = [];
     loading.kits_id = [];
-    loading.status_loading = "Requested"
-    loading.date_loading = new Date().toISOString()
+   
     // save loading in the database
 
     await loading.save();
