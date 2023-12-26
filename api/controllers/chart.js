@@ -27,6 +27,8 @@ exports.chartLoadingAndNewMaterial=async(req,res)=>{
             obj_approved.offloading_existing.date_offloading_existing = {$gt:from,$lt:to}
             obj_approved.new_material.date = {$gt:from,$lt:to}
         }
+
+        console.log(obj)
         
         const loading = await loadingModel.find(obj.loading)
         const offloading_existing = await loadingModel.find(obj.offloading_existing)
@@ -39,15 +41,23 @@ exports.chartLoadingAndNewMaterial=async(req,res)=>{
         res.status(200).json({
             success: true,
             data: {
-                loading_requested: loading.length,
-                offloading_existing_requested: offloading_existing.length, 
-                offloading_new_material_requested: new_material.length,
-                loading_approved: loading_approved.length,
-                offloading_existing_approved: offloading_existing_approved.length,
-                offloading_new_material_approved: new_material_approved.length,
-                total_loading: loading.length+loading_approved.length,
-                total_offloading_existing: offloading_existing.length+offloading_existing_approved.length,
-                total_offloading_new_material_approved:  new_material.length+new_material_approved.length
+                loading : {
+                    loading_requested: loading.length,
+                    loading_approved: loading_approved.length,
+                    total_loading: loading.length+loading_approved.length,
+                },
+                offloading_existing: {
+                    offloading_existing_requested: offloading_existing.length,
+                    offloading_existing_approved: offloading_existing_approved.length, 
+                    total_offloading_existing: offloading_existing.length+offloading_existing_approved.length,
+                },
+                offloading_new_material: {
+                    offloading_new_material_requested: new_material.length,
+                    offloading_new_material_approved: new_material_approved.length,
+                    total_offloading_new_material_approved:  new_material.length+new_material_approved.length
+                },
+               
+                
             }
         })
 
@@ -60,22 +70,74 @@ exports.chartLoadingAndNewMaterial=async(req,res)=>{
 
 exports.chartOccupancy = async (req,res)=>{
     try{
-       const cable_inner = await spareCableModel.aggregate([{
-        $group: {_id:{tank_level: '$tank_level'},length: {$sum: '$length_mess'}}
+       const cable_inner = await spareCableModel.aggregate([
+        {
+            $match: {tank:"inner"}
+        },
+        {
+            $group: {_id:'$tank_location',length_meas: {$sum:'$length_meas'}}
        },
-    { $match: {tank_location: "Inner"}}
+       {
+        $sort: {_id:1}
+       }
     ])
-    const cable_outer = await spareCableModel.aggregate([{
-        $group: {_id:{tank_level: '$tank_level'},length: {$sum: '$length_mess'}}
-       },
-    { $match: {tank_location: "Outer"}}
+    const cable_outer = await spareCableModel.aggregate([
+        {
+            $match: {tank:"outer"}
+        },
+        {
+        $group: {_id:'$tank_location',length_meas: {$sum: '$length_meas'}}
+        },
+        {
+            $sort: {_id:1}
+        }
     ])
+
+    let arr = []
+    for(let i = 0;i<cable_inner.length;i++){
+        let obj = {
+            tank_location: "",
+            tank: {
+                inner: 0,
+                outer: 0
+            }
+        }
+        obj.tank_location = cable_inner[i]._id
+        obj.tank.inner= cable_inner[i].length_meas
+        cable_outer.forEach((a)=>{
+          if(obj.tank_location==a._id){
+            obj.tank.outer= a.length_meas
+          }
+        }
+       )
+       arr.push(obj)
+    }
+    let mark_exist_tank = []
+    arr.forEach((a)=>{
+        mark_exist_tank.push(a.tank_location)
+    })
+    cable_outer.forEach((e)=>{
+        let obj = {
+            tank_location: "",
+            tank: {
+                inner: 0,
+                outer: 0
+            }
+        }
+        if(!mark_exist_tank.includes(e._id)){ 
+            obj.tank_location = e._id
+            obj.tank.outer = e.length_meas
+            arr.push(obj)
+        }
+    })
+    
 
     res.status(200).json({
         success: true,
         data: {
-            cable_inner,
-            cable_outer
+            tank: arr.sort(),
+            // cable_inner,
+            // cable_outer
         }
     })
      

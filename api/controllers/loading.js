@@ -458,6 +458,7 @@ exports.postLoading = async (req, res) => {
 //get all loading
 exports.getLoading = async (req, res) => {
   const loading = await loadingModel.find();
+  
   res.send(loading);
 };
 
@@ -787,8 +788,10 @@ exports.approveLoading = async (req,res)=>{
   try{
     const {id} = req.params
     const {status} = req.body
-    await loadingModel.updateOne({_id:id},{$set:{status:status,date_loading:new Date().toISOString()}})
+    const update = await loadingModel.updateOne({_id:id},{$set:{status_loading:status,date_loading:new Date().toISOString()}})
+    console.log(update)
     const data = await loadingModel.findOne({_id:id})
+    console.log(data)
     res.status(200).json({
       message: "Update loading status successfully!",
       data
