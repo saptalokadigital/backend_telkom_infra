@@ -38,6 +38,6 @@ router.post(
 );
 
 router.get("/evidence/:loadingId", loadingController.downloadFile);
-router.post("/status/:id",loadingController.approveLoading)
+router.put("/status/:id",loadingController.approveLoading)
 
 module.exports = router;

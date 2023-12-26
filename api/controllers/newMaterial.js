@@ -77,6 +77,9 @@ exports.createLoadingNewMaterial = async (req, res) => {
 
   data.no_bast = `${data.first_digit_bast}/BAST_New_Material/${romanMonth}/${year}`;
 
+ data.status = "Requested";
+ data.date = new Date().toISOString()
+
   const result = await data.save();
   res.status(201).json({ success: true, id: result._id, loading: result });
 };
@@ -335,8 +338,7 @@ exports.offloadingNewMaterialSubmittion = async (req, res) => {
     }
 
     offloadingNewMaterial.isSubmitted = true;
-    offloadingNewMaterial.status = "Requested";
-    offloadingNewMaterial.date = new Date().toISOString()
+
 
     await offloadingNewMaterial.save();
 
