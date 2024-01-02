@@ -3,7 +3,10 @@ const uniqueValidator = require("mongoose-unique-validator");
 const { Schema } = mongoose;
 
 const spareKitsSchema = new Schema(
-  {
+  { 
+    kitNumber: {
+      type: Number, 
+    }, 
     no: {
       type: Number,
     },
