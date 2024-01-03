@@ -67,5 +67,6 @@ const loadingSchema = mongoose.Schema({
   date_loading : {type: Date},
   status_offloading_existing: {type: String},
   date_offloading_existing : {type: Date},
+  dol_type: {type: String}
 });
 module.exports = mongoose.model("loading", loadingSchema);

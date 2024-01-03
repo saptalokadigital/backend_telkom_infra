@@ -158,7 +158,7 @@ exports.chartSpareKit = async (req, res) => {
     try {
         const spare_kits = await spareKitsModel.aggregate([
             {
-                $group: { _id: "$no", qty: { $sum: "$qty" } }
+                $group: { _id: "$part_number", qty: { $sum: "$qty" } }
             },
             {
                 $sort: { qty: 1 }
