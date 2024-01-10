@@ -24,7 +24,6 @@ exports.signUpNewUser = (req, res) => {
             });
           } else {
             const user = new User({
-              _id: new mongoose.Types.ObjectId(),
               name: req.body.name,
               username: req.body.username,
               email: req.body.email,
@@ -53,7 +52,7 @@ exports.signUpNewUser = (req, res) => {
 };
 //User Login
 exports.userSignIn = (req, res) => {
-  User.find({ username: req.body.username })
+  User.find({ email: req.body.email })
     .exec()
     .then((user) => {
       if (user.length < 1) {
@@ -72,8 +71,10 @@ exports.userSignIn = (req, res) => {
         if (result) {
           const token = jwt.sign(
             {
+              name:user[0].name,
               username: user[0].username,
-              userId: user[0]._id,
+              email:user[0].email,
+              userId: user[0]._id.toString(),
               role: user[0].role,
             },
             process.env.JWT_KEY,
@@ -81,6 +82,7 @@ exports.userSignIn = (req, res) => {
               expiresIn: "1d",
             }
           );
+          res.cookie('access_token',token,{httpOnly:true})
           return res.status(200).json({
             message: "Auth successful",
             status: true,
@@ -121,23 +123,42 @@ exports.deleteUser = (req, res) => {
 
 exports.validate = (req, res) => {
   try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token)
+  
+    if (!req.user){
       return res
         .status(401)
         .send({ auth: false, message: "No token provided." });
+    }
 
-    jwt.verify(token, process.env.JWT_KEY, function (err, decoded) {
-      if (err)
-        return res.status(500).send({
-          auth: false,
-          message: "Failed to authenticate token.",
-        });
+    return res.status(200).json({
+      auth:true,
+      status:true,
+      data: req.user
+    })
 
-      res.status(200).send(decoded);
+  } catch (error) {
+    return res.status(500).send({
+      auth: false,
+      message: "Failed to authenticate token.",
     });
+  }
+};
+
+exports.logout = (req, res) => {
+  try {
+  
+    if (!req.user){
+      return res.status(401).json({ auth: false, message: "No token provided." });
+    }
+
+    res.clearCookie('access_token')
+
+    return res.status(200).json({
+      auth:false,
+      status:true,
+      message: 'Logout successfully!'
+    })
+
   } catch (error) {
     return res.status(500).send({
       auth: false,
