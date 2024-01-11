@@ -189,7 +189,7 @@ exports.getChartByCableType = async (req, res) => {
     },
     {
       $sort: {
-        cable_type: 1, // 1 untuk ascending order dan -1 untuk descending order
+        cable_type: -1, // 1 untuk ascending order dan -1 untuk descending order
       },
     },
   ];

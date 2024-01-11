@@ -14,6 +14,8 @@ router.delete("/:userId", userController.deleteUser);
 
 router.get("/validate", auth, userController.validate);
 
+router.post("/logout",auth,userController.logout)
+
 router.get("/userProfile", auth, userController.userProfile);
 
 router.get("/data", userController.getAll);

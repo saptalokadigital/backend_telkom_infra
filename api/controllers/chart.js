@@ -18,6 +18,11 @@ exports.chartLoadingAndNewMaterial = async (req, res) => {
             offloading_existing: { status_offloading_existing: "Approved" },
             new_material: { status: "Approved" }
         }
+        let obj_draft = {
+            loading: { status_loading: "Draft" },
+            offloading_existing: { status_offloading_existing: "Draft" },
+            new_material: { status: "Draft" }
+        }
 
         if (from && to) {
             obj.loading.date_loading = { $gt: from, $lt: to };
@@ -27,6 +32,10 @@ exports.chartLoadingAndNewMaterial = async (req, res) => {
             obj_approved.loading.date_loading = { $gt: from, $lt: to };
             obj_approved.offloading_existing.date_offloading_existing = { $gt: from, $lt: to }
             obj_approved.new_material.date = { $gt: from, $lt: to }
+
+            obj_draft.loading.date_loading = { $gt: from, $lt: to };
+            obj_draft.offloading_existing.date_offloading_existing = { $gt: from, $lt: to }
+            obj_draft.new_material.date = { $gt: from, $lt: to }
         }
 
         console.log(obj)
@@ -39,23 +48,30 @@ exports.chartLoadingAndNewMaterial = async (req, res) => {
         const offloading_existing_approved = await loadingModel.find(obj_approved.offloading_existing)
         const new_material_approved = await offloadingNewMaterialModel.find(obj_approved.new_material)
 
+        const loading_draft = await loadingModel.find(obj_draft.loading)
+        const offloading_existing_draft = await loadingModel.find(obj_draft.offloading_existing)
+        const new_material_draft = await offloadingNewMaterialModel.find(obj_draft.new_material)
+
         res.status(200).json({
             success: true,
             data: {
                 loading: {
                     loading_requested: loading.length,
                     loading_approved: loading_approved.length,
-                    total_loading: loading.length + loading_approved.length,
+                    loading_draft: loading_draft.length,
+                    total_loading: loading.length + loading_approved.length+loading_draft.length,
                 },
                 offloading_existing: {
                     offloading_existing_requested: offloading_existing.length,
                     offloading_existing_approved: offloading_existing_approved.length,
-                    total_offloading_existing: offloading_existing.length + offloading_existing_approved.length,
+                    offloading_existing_draft: offloading_existing_draft.length,
+                    total_offloading_existing: offloading_existing.length + offloading_existing_approved.length+offloading_existing_draft.length,
                 },
                 offloading_new_material: {
                     offloading_new_material_requested: new_material.length,
                     offloading_new_material_approved: new_material_approved.length,
-                    total_offloading_new_material_approved: new_material.length + new_material_approved.length
+                    offloading_new_material_draft: new_material_draft.length,
+                    total_offloading_new_material: new_material.length + new_material_approved.length+new_material_draft.length
                 },
 
 
@@ -141,7 +157,9 @@ exports.chartOccupancy = async (req, res) => {
         res.status(200).json({
             success: true,
             data: {
-                tank: arr.sort(),
+                tank: arr.sort(function(a, b) {
+                    return a.tank.total - b.tank.total;
+                  }),
                 // cable_inner,
                 // cable_outer
             }
@@ -161,7 +179,7 @@ exports.chartSpareKit = async (req, res) => {
                 $group: { _id: "$part_number", qty: { $sum: "$qty" } }
             },
             {
-                $sort: { qty: 1 }
+                $sort: { qty: -1 }
             }
 
         ])

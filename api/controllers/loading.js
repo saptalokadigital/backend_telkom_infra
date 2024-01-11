@@ -445,7 +445,7 @@ exports.postLoading = async (req, res) => {
   data.no_bast = `${data.first_digit_bast}/BAST_Loading/${romanMonth}/${year}`;
   data.no_invoice = `${data.first_digit_invoice}/TI/${romanMonth}/${year}`;
 
-  data.status_offloading_existing = "Draft";
+  data.status_offloading_existing = "";
   data.date_offloading_existing = new Date().toISOString();
 
   data.status_loading = "Draft";
@@ -496,8 +496,9 @@ exports.getTurnoverByLoadingId = async (req, res) => {
 
     //check if loading is empty
     if (loading.cables_id.length === 0) {
-      return res.status(400).json({
+      return res.status(200).json({
         message: "Loading cables is empty!",
+        uniqueTurnOver: [],
       });
     }
 
@@ -693,6 +694,7 @@ exports.loadingSubmittion = async (req, res) => {
 
     // Simpan dalam loading.submitted_date_loading
     loading.submitted_date_loading = formattedDate;
+    loading.status_loading = "Approved";
 
     // remove the cable and kit id from the array
     loading.cables_id = [];
@@ -787,20 +789,18 @@ exports.approveLoading = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    const update = await loadingModel.updateOne(
+    await loadingModel.updateOne(
       { _id: id },
       {
         $set: {
           status_loading: status,
-          date_loading: new Date().toISOString(),
+          date_offloading_existing: new Date().toISOString(),
         },
       }
     );
-    console.log(update);
     const data = await loadingModel.findOne({ _id: id });
-    console.log(data);
     res.status(200).json({
-      message: "Update loading status successfully!",
+      message: "Update offloading existing material status successfully!",
       data,
     });
   } catch (err) {
