@@ -4,9 +4,6 @@ const { Schema } = mongoose;
 
 const spareKitsSchema = new Schema(
   { 
-    kitNumber: {
-      type: Number, 
-    }, 
     no: {
       type: Number,
     },

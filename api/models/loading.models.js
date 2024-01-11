@@ -63,9 +63,10 @@ const loadingSchema = mongoose.Schema({
   no_invoice_offloading: { type: String },
   month_offloading: { type: String },
   year_offloading: { type: String },
-  status_loading: {type: String},
-  date_loading : {type: Date},
-  status_offloading_existing: {type: String},
-  date_offloading_existing : {type: Date},
+  status_loading: { type: String },
+  date_loading: { type: Date },
+  status_offloading_existing: { type: String },
+  date_offloading_existing: { type: Date },
+  dol_type: { type: String },
 });
 module.exports = mongoose.model("loading", loadingSchema);

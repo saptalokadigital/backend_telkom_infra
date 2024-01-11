@@ -77,8 +77,8 @@ exports.createLoadingNewMaterial = async (req, res) => {
 
   data.no_bast = `${data.first_digit_bast}/BAST_New_Material/${romanMonth}/${year}`;
 
- data.status = "Requested";
- data.date = new Date().toISOString()
+  data.status = "Draft";
+  data.date = new Date().toISOString();
 
   const result = await data.save();
   res.status(201).json({ success: true, id: result._id, loading: result });
@@ -338,7 +338,7 @@ exports.offloadingNewMaterialSubmittion = async (req, res) => {
     }
 
     offloadingNewMaterial.isSubmitted = true;
-
+    offloadingNewMaterial.status = "Approved";
 
     await offloadingNewMaterial.save();
 
@@ -589,20 +589,22 @@ exports.downloadFileKit = async (req, res) => {
   }
 };
 
-exports.approveNewMaterial = async (req,res)=>{
-  try{
-    const {id} = req.params
-    const {status} = req.body
-    await offloadingNewMaterialModel.updateOne({_id:id},{$set:{status:status,date:new Date().toISOString()}})
-    const data = await offloadingNewMaterialModel.findOne({_id:id})
+exports.approveNewMaterial = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    await offloadingNewMaterialModel.updateOne(
+      { _id: id },
+      { $set: { status: status, date: new Date().toISOString() } }
+    );
+    const data = await offloadingNewMaterialModel.findOne({ _id: id });
     res.status(200).json({
       message: "Update new material status successfully!",
-      data
+      data,
     });
-
-  }catch(err){
+  } catch (err) {
     res.status(500).json({
-      message : err.message
-    })
+      message: err.message,
+    });
   }
-}
+};

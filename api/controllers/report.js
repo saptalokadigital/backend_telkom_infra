@@ -198,34 +198,36 @@ exports.getReportKitsPopulate = (req, res) => {
       {
         $group: {
           _id: {
-            system: "$system._id",
+            // system: "$system._id",
             part_number: "$part_number",
           },
-          qty: { $sum: 1 },
+          part_number: {$first: "$part_number"},
+          qty: { $sum: "$qty" },
           location: { $first: "$location" },
           item_name: { $first: "$item_name" },
           serial_number: { $first: "$serial_number" },
           weight: { $first: "$weight" },
           unit: { $first: "$unit" },
           rak_number: { $first: "$rak_number" },
+          system: {$first:"$system.system"}
         },
       },
-      {
-        $lookup: {
-          from: "systems",
-          localField: "_id.system",
-          foreignField: "_id",
-          as: "system",
-        },
-      },
-      {
-        $unwind: "$system",
-      },
+      // {
+      //   $lookup: {
+      //     from: "System",
+      //     localField: "system",
+      //     foreignField: "_id",
+      //     as: "system",
+      //   },
+      // },
+      // {
+      //   $unwind: "$system",
+      // },
       {
         $project: {
           _id: 0,
-          system: "$system.system",
-          part_number: "$_id.part_number",
+          system: 1,
+          part_number: 1,
           qty: 1,
           location: 1,
           item_name: 1,
@@ -238,7 +240,7 @@ exports.getReportKitsPopulate = (req, res) => {
     ])
     .exec(function (err, cables) {
       if (err) {
-        res.send("error has occured");
+        res.send(err.message);
       } else {
         console.log(cables);
         res.json(cables);
