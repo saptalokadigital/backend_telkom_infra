@@ -24,6 +24,7 @@ const spareCableNewMaterialRoutes = require("./newMaterial");
 const dashboardRoutes = require("./dashboard");
 const kursRouter = require("./master_data/kurs");
 const chart = require("./chart");
+const vessel = require("./master_data/vessel");
 
 router.use("/user", userRoutes);
 router.use("/spareCable", spareCableRoutes);
@@ -49,5 +50,6 @@ router.use("/offloadingNewMaterial", spareCableNewMaterialRoutes);
 router.use("/dashboard", dashboardRoutes);
 router.use("/kurs", kursRouter);
 router.use("/chart",chart)
+router.use("/vessel",vessel)
 
 module.exports = router;
