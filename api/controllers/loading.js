@@ -446,7 +446,7 @@ exports.postLoading = async (req, res) => {
   data.no_invoice = `${data.first_digit_invoice}/TI/${romanMonth}/${year}`;
 
   data.status_offloading_existing = "";
-  data.date_offloading_existing = new Date().toISOString();
+  data.date_offloading_existing = "";
 
   data.status_loading = "Draft";
   data.date_loading = new Date().toISOString();
