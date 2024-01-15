@@ -473,11 +473,36 @@ exports.approveOffloadingExisting = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
+
     await loadingModel.updateOne(
       { _id: id },
       {
         $set: {
           status_offloading_existing: status,
+        },
+      }
+    );
+    const data = await loadingModel.findOne({ _id: id });
+    res.status(200).json({
+      message: "Update offloading existing material status successfully!",
+      data,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
+exports.draftOffloadingExisting = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await loadingModel.updateOne(
+      { _id: id },
+      {
+        $set: {
+          status_offloading_existing: "Draft",
           date_offloading_existing: new Date().toISOString(),
         },
       }
