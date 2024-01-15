@@ -35,4 +35,9 @@ router.post(
   offloadingController.approveOffloadingExisting
 );
 
+router.post(
+  "/statusExistingDraft/:id",
+  offloadingController.draftOffloadingExisting
+);
+
 module.exports = router;
