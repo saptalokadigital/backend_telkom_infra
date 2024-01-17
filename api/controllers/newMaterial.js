@@ -168,7 +168,8 @@ exports.getAllOffloadingNewMaterial = async (req, res) => {
   try {
     const offloadingNewMaterial = await offloadingNewMaterialModel
       .find()
-      .select("-evidence");
+      .select("-evidence")
+      .sort({ date: -1 });
     res.status(200).json(offloadingNewMaterial);
   } catch (error) {
     console.error(error);
