@@ -446,7 +446,6 @@ exports.postLoading = async (req, res) => {
   data.no_invoice = `${data.first_digit_invoice}/TI/${romanMonth}/${year}`;
 
   data.status_offloading_existing = "";
-  data.date_offloading_existing = "";
 
   data.status_loading = "Draft";
   data.date_loading = new Date().toISOString();
@@ -457,7 +456,7 @@ exports.postLoading = async (req, res) => {
 
 //get all loading
 exports.getLoading = async (req, res) => {
-  const loading = await loadingModel.find();
+  const loading = await loadingModel.find().sort({ date_loading: -1 });
 
   res.send(loading);
 };
@@ -794,7 +793,6 @@ exports.approveLoading = async (req, res) => {
       {
         $set: {
           status_loading: status,
-          date_offloading_existing: new Date().toISOString(),
         },
       }
     );
