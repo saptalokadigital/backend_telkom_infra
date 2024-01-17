@@ -460,6 +460,7 @@ exports.offloadingSubmittion = async (req, res) => {
 
   // Simpan dalam loading.submitted_date_loading
   loading.submitted_date_offloading = formattedDate;
+  loading.status_offloading_existing = "Approved";
 
   await loading.save();
 
