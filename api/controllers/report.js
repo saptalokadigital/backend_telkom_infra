@@ -185,31 +185,19 @@ exports.getReportKitsPopulate = (req, res) => {
   spareKitsSchema
     .aggregate([
       {
-        $lookup: {
-          from: "systems",
-          localField: "system",
-          foreignField: "_id",
-          as: "system",
-        },
-      },
-      {
-        $unwind: "$system",
-      },
-      {
         $group: {
           _id: {
             // system: "$system._id",
             part_number: "$part_number",
           },
-          part_number: {$first: "$part_number"},
+          part_number: { $first: "$part_number" },
           qty: { $sum: "$qty" },
           location: { $first: "$location" },
-          item_name: { $first: "$item_name" },
-          serial_number: { $first: "$serial_number" },
+          item_name: { $addToSet: "$item_name" },
+          serial_number: { $addToSet: "$serial_number" },
           weight: { $first: "$weight" },
           unit: { $first: "$unit" },
-          rak_number: { $first: "$rak_number" },
-          system: {$first:"$system.system"}
+          rak_number: { $addToSet: "$rak_number" },
         },
       },
       // {
