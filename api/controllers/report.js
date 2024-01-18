@@ -73,6 +73,7 @@ exports.getReportPopulate = (req, res) => {
           },
           count: { $sum: 1 },
           length_report: { $sum: "$length_report" },
+          label_id: { $addToSet: "$label_id" },
           min_wd: { $first: "$armoring_type.min_wd" },
           max_wd: { $first: "$armoring_type.max_wd" },
         },
@@ -154,6 +155,7 @@ exports.getReportPopulate = (req, res) => {
       {
         $project: {
           _id: 0,
+          label_id: 1,
           system: "$system.system",
           sigma_core: "$_id.sigma_core",
           manufacturer: "$manufacturer.manufacturer",
